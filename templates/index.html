@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<title>PCDE Client</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/static/main.css">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-black.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif;}
+.w3-sidebar {
+  z-index: 3;
+  width: 250px;
+  top: 43px;
+  bottom: 0;
+  height: inherit;
+}
+</style>
+<script>
+    $(function(){
+      $("#includedContent").load("/static/header.html");
+    });
+</script>
+<body>
+
+<div id="includedContent"></div>
+
+<!-- Main content: shift it to the right by 250 pixels when the sidebar is visible -->
+<div class="w3-main" style="margin-left:250px">
+
+  <div class="w3-row w3-padding-64">
+    <div class="w3-twothird w3-container">
+      <h1 class="w3-text-teal">PCDE Client</h1>
+      <p>This server provides a client for interacting with the <a href="https://davinci-pcde-ri.logicahealth.org/">Da Vinci Payer Coverage Decision Exchange Reference Implementation.</a></p>
+      <p>To begin using the client click on one of links on the side menu. These will allow you to send and retrieve information from the reference implementation server.</p>
+    </div>
+
+  </div>
+
+  <div class="w3-row">
+    <div class="w3-twothird w3-container">
+      <h1 class="w3-text-teal">FHIR Endpoint</h1>
+      <p>All requests are made to the endpoint: <a href="https://davinci-pcde-ri.logicahealth.org/fhir">https://davinci-pcde-ri.logicahealth.org/fhir</a></p>
+      <p>To make more direct requests you can visit the reference server or post your own fhir requests</p>
+    </div>
+
+  </div>
+
+  <div class="w3-row w3-padding-64">
+    <div class="w3-twothird w3-container">
+      <h1 class="w3-text-teal">PCDE Implementation Guide</h1>
+      <p>The Implementation Guide for Payer Coverage Decision Exchange can be found here: <a href="http://build.fhir.org/ig/HL7/davinci-pcde/index.html">PCDE Implementation Guide</a></p>
+    </div>
+  </div>
+
+  <footer id="myFooter" class="footer">
+    <div class="w3-container w3-theme-l2 w3-padding-32">
+      <h4></h4>
+    </div>
+
+  </footer>
+
+<!-- END MAIN -->
+</div>
+
+<script>
+// Get the Sidebar
+var mySidebar = document.getElementById("mySidebar");
+
+// Get the DIV with overlay effect
+var overlayBg = document.getElementById("myOverlay");
+
+// Toggle between showing and hiding the sidebar, and add overlay effect
+function w3_open() {
+  if (mySidebar.style.display === 'block') {
+    mySidebar.style.display = 'none';
+    overlayBg.style.display = "none";
+  } else {
+    mySidebar.style.display = 'block';
+    overlayBg.style.display = "block";
+  }
+}
+
+// Close the sidebar with the close button
+function w3_close() {
+  mySidebar.style.display = "none";
+  overlayBg.style.display = "none";
+}
+</script>
+
+</body>
+</html>

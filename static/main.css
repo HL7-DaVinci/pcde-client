@@ -1,0 +1,28 @@
+.footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+.submit-button {
+    background: rgb(0,150,136);
+    height: 30px;
+    color: white;
+}
+.submit-button:hover {
+  background: white;
+  color: black;
+}
+.text-input {
+    height: 30px;
+}
+pre {padding: 5px; margin: 5px; margin-top: 20px; width: 80%;}
+.string { color: green; }
+.number { color: darkorange; }
+.boolean { color: blue; }
+.null { color: magenta; }
+.key { color: red; }
+
+.indent {margin-left: 25px;}
+.overflow {
+    overflow: scroll;
+}
