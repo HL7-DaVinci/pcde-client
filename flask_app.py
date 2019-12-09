@@ -16,6 +16,10 @@ def patient(name=None):
 def comreq(name=None):
     return render_template('comreq.html', name=name)
 
+@app.route('/CommunicationRequestb')
+def comreqb(name=None):
+    return render_template('comreqb.html', name=name)
+
 @app.route('/Bundle')
 def bundle(name=None):
     return render_template('bundle.html', name=name)
@@ -48,17 +52,40 @@ def get_comreq():
     print (r)
     json_data = json.loads(r.text)
     return jsonify(**json_data)
-@app.route('/postcomreq')
-def post_comrep():
+@app.route('/postcomreqb')
+def post_comreqb():
     headers = {'Accept' : 'application/json', 'Content-Type' : 'application/json'}
     pid = request.args.get('pid')
     rid = request.args.get('rid')
     sid = request.args.get('sid')
+    given = request.args.get('given')
+    family = request.args.get('family')
+    bdate = request.args.get('birthdate')
+    patient_info = {"given":given, "family":family, "birthdate":bdate}
+    req_data = make_bundle_request(pid, sid, rid, patient_info)
+    print(req_data)
+    url = base_url + 'PCDE'
+    r = requests.post(url, json = req_data, headers=headers, verify=False)
+    json_data = json.loads(r.text)
+    #print (json_data["payload"][0]["contentAttachment"]["data"])
+    encoding = str(json_data["payload"][0]["contentAttachment"]["data"])
+    json_data["payload"][0]["contentAttachment"]["data"] = str(base64.b64decode(encoding))
+    json_data["status_code"] = r.status_code
+
+    #print(jsonify(**json_data))
+    return jsonify(**json_data)
+@app.route('/postcomreq')
+def post_comreq():
+    headers = {'Accept' : 'application/json', 'Content-Type' : 'application/json'}
+    pid = request.args.get('pid')
+    rid = request.args.get('rid')
+    sid = request.args.get('sid')
+
     req_data = make_request(pid, sid, rid)
     url = base_url + 'PCDE'
     r = requests.post(url, json = req_data, headers=headers, verify=False)
     json_data = json.loads(r.text)
-    print (json_data["payload"][0]["contentAttachment"]["data"])
+    #print (json_data["payload"][0]["contentAttachment"]["data"])
     encoding = str(json_data["payload"][0]["contentAttachment"]["data"])
     json_data["payload"][0]["contentAttachment"]["data"] = str(base64.b64decode(encoding))
     return jsonify(**json_data)
@@ -108,6 +135,94 @@ def make_request(pid, sid, rid):
         }
     }
     return comreq
+def make_patient(pid, patient_info):
+    patient = {
+      "fullUrl": "http://example.org/fhir/Patient/" + str(pid),
+      "resource": {
+        "resourceType": "Patient",
+        "id": str(pid),
+        "text": {
+          "status": "generated",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative with Details</b></p><p><b>id</b>: 1</p><p><b>identifier</b>: 12345678901</p><p><b>name</b>: "+patient_info["given"] + patient_info["family"] + " </p></div>"
+        },
+        "identifier": [
+          {
+            "system": "http://example.org/MIN",
+            "value": ""
+          }
+        ],
+        "name": [
+          {
+            "family": "",
+            "given": []
+          }
+        ],
+        "address": []
+      }
+    }
+    if checkExists("birthdate", patient_info):
+        patient["resource"]["birthDate"] = patient_info["birthdate"]
+    if checkExists("family", patient_info):
+        patient["resource"]["name"][0]["family"] = patient_info["family"]
+    if checkExists("given", patient_info):
+        patient["resource"]["name"][0]["given"].append(patient_info["given"])
+    if checkExists("address", patient_info):
+        patient["resource"]["address"].append(patient_info["family"])
+    if checkExists("identifier", patient_info):
+        patient["resource"]["identifier"][0]["value"] = patient_info["identifier"]
+    return patient
+def checkExists(key, obj):
+    return key in obj and not obj[key] == ""
+def make_org(id, name):
+    return {
+      "fullUrl": "http://example.org/fhir/Organization/" + str(id),
+      "resource": {
+        "resourceType": "Organization",
+        "id": str(id),
+        "text": {
+          "status": "generated",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative with Details</b></p><p><b>id</b>: "+str(id)+"</p><p><b>identifier</b>: 789312</p><p><b>name</b>: "+name+"</p></div>"
+        },
+        "identifier": [
+          {
+            "system": "http://example.org/ETIN",
+            "value": "789312"
+          }
+        ],
+        "name": name
+      }
+    }
+def make_bundle_request(pid, sid, rid, patient_info):
+    comreq = {
+        "resourceType": "Bundle",
+        "id": "pcde-communicationrequest-example",
+        "meta": {
+          "lastUpdated": "2019-07-21T11:01:00+05:00"
+        },
+        "type": "collection",
+        "timestamp": "2019-07-21T11:01:00+05:00",
+        "entry": [
+          {"fullUrl": "http://example.org/fhir/CommunicationRequest/1",
+          "resource": make_request(pid, sid, rid)},
+          make_patient(pid, patient_info),
+          make_org(sid, "MARYLAND CAPITAL INSURANCE COMPANY"),
+          make_org(rid, "MARYLAND GLOBAL INSURANCE COMPANY")
+        ]
+        }
+    return comreq
+
+def test_address():
+    return [
+    {
+      "line": [
+        "49 Meadow St"
+      ],
+      "city": "Mounds",
+      "state": "OK",
+      "postalCode": "74047",
+      "country": "US"
+    }
+  ]
 
 if __name__ == "__main__":
-    app.run(debug=False, host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0')
