@@ -3,8 +3,9 @@ $(function() {
     $("#display").html("<div></div>");
     pid = $("#pid").val();
     sid = $("#sid").val();
+    url = $("#url").val().replace(/\//g, '%2F');
     rid = $("#rid").val();
-    $.getJSON('/postcomreq?pid='+pid+'&sid='+sid+'&rid='+rid,
+    $.getJSON('/postcomreq?pid='+pid+'&sid='+sid+'&rid='+rid+'&url='+url,
         function(data) {
           console.log(data)
           var div = "<div><h2>"+data["resourceType"]+"</h2>";

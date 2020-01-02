@@ -29,7 +29,8 @@ def get_patient():
     given = request.args.get('given')
     family = request.args.get('family')
     bdate = request.args.get('birthdate')
-    url = base_url + 'Patient?given='+given+'&family='+family+'&birthdate='+bdate
+    url = request.args.get('url').replace("%2F", "/") if request.args.get('url') else base_url
+    url += 'Patient?given='+given+'&family='+family+'&birthdate='+bdate
     r = requests.get(url, headers=headers, verify=False)
     print (r)
     json_data = json.loads(r.text)
@@ -38,7 +39,9 @@ def get_patient():
 def get_bundle():
     headers = {'Accept' : 'application/json', 'Content-Type' : 'application/json'}
     id = request.args.get('id')
-    url = base_url + 'Bundle/' + id
+    url = request.args.get('url').replace("%2F", "/") if request.args.get('url') else base_url
+    url += 'Bundle/' + id
+    print (url)
     r = requests.get(url, headers=headers, verify=False)
     print (r)
     json_data = json.loads(r.text)
@@ -47,7 +50,8 @@ def get_bundle():
 def get_comreq():
     headers = {'Accept' : 'application/json', 'Content-Type' : 'application/json'}
     id = request.args.get('id')
-    url = base_url + 'CommunicationRequest/' + id
+    url = request.args.get('url').replace("%2F", "/") if request.args.get('url') else base_url
+    url += 'CommunicationRequest/' + id
     r = requests.get(url, headers=headers, verify=False)
     print (r)
     json_data = json.loads(r.text)
@@ -55,24 +59,24 @@ def get_comreq():
 @app.route('/postcomreqb')
 def post_comreqb():
     headers = {'Accept' : 'application/json', 'Content-Type' : 'application/json'}
-    pid = request.args.get('pid')
-    rid = request.args.get('rid')
-    sid = request.args.get('sid')
+    pid = 1#request.args.get('pid')
+    rid = 2#request.args.get('rid')
+    sid = 3#request.args.get('sid')
     given = request.args.get('given')
     family = request.args.get('family')
     bdate = request.args.get('birthdate')
     patient_info = {"given":given, "family":family, "birthdate":bdate}
     req_data = make_bundle_request(pid, sid, rid, patient_info)
     print(req_data)
-    url = base_url + 'PCDE'
+    url = request.args.get('url').replace("%2F", "/") if request.args.get('url') else base_url
+    url += 'PCDE'
     r = requests.post(url, json = req_data, headers=headers, verify=False)
     json_data = json.loads(r.text)
     #print (json_data["payload"][0]["contentAttachment"]["data"])
     encoding = str(json_data["payload"][0]["contentAttachment"]["data"])
     json_data["payload"][0]["contentAttachment"]["data"] = str(base64.b64decode(encoding))
     json_data["status_code"] = r.status_code
-
-    #print(jsonify(**json_data))
+    print(r.text)
     return jsonify(**json_data)
 @app.route('/postcomreq')
 def post_comreq():
@@ -82,12 +86,15 @@ def post_comreq():
     sid = request.args.get('sid')
 
     req_data = make_request(pid, sid, rid)
-    url = base_url + 'PCDE'
+    url = request.args.get('url').replace("%2F", "/") if request.args.get('url') else base_url
+    url += 'PCDE'
     r = requests.post(url, json = req_data, headers=headers, verify=False)
     json_data = json.loads(r.text)
     #print (json_data["payload"][0]["contentAttachment"]["data"])
     encoding = str(json_data["payload"][0]["contentAttachment"]["data"])
     json_data["payload"][0]["contentAttachment"]["data"] = str(base64.b64decode(encoding))
+    print("get this")
+    print(r.text)
     return jsonify(**json_data)
 @app.route('/favicon.ico')
 def favicon():
@@ -215,11 +222,11 @@ def test_address():
     return [
     {
       "line": [
-        "49 Meadow St"
+        "123 Main St"
       ],
-      "city": "Mounds",
+      "city": "Somewhere",
       "state": "OK",
-      "postalCode": "74047",
+      "postalCode": "12345",
       "country": "US"
     }
   ]

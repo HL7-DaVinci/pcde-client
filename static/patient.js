@@ -4,7 +4,8 @@ $(function() {
     family = $("#family").val();
     bdate = $("#bdate").val();
     $("#display").html("<div></div>");
-    $.getJSON('/getpatient?given='+given+'&family='+family+'&birthdate='+bdate,
+    url = $("#url").val().replace(/\//g, '%2F');
+    $.getJSON('/getpatient?given='+given+'&family='+family+'&birthdate='+bdate+'&url='+url,
         function(data) {
           console.log(data)
           formatter = formatResource(data);

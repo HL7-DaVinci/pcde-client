@@ -1,8 +1,10 @@
 $(function() {
   $('#gp').bind('click', function() {
     id = $("#pid").val();
+    url = $("#url").val().replace(/\//g, '%2F');
+    console.log(url)
     $("#display").html("<div></div>");
-    $.getJSON('/getbundle?id='+id,
+    $.getJSON('/getbundle?id='+id+'&url='+url,
         function(data) {
           formatter = formatResource(data);
           $("#json").html("<h3>Full Bundle</h3>"+syntaxHighlight(JSON.stringify(formatter, undefined, 2)));

@@ -26,3 +26,6 @@ pre {padding: 5px; margin: 5px; margin-top: 20px; width: 80%;}
 .overflow {
     overflow: scroll;
 }
+.endpoint {
+    width: 300px;
+}
