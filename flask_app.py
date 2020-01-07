@@ -65,7 +65,8 @@ def post_comreqb():
     given = request.args.get('given')
     family = request.args.get('family')
     bdate = request.args.get('birthdate')
-    patient_info = {"given":given, "family":family, "birthdate":bdate}
+    identifier = request.args.get('identifier')
+    patient_info = {"given":given, "family":family, "birthdate":bdate, "identifier": identifier}
     req_data = make_bundle_request(pid, sid, rid, patient_info)
     print(req_data)
     url = request.args.get('url').replace("%2F", "/") if request.args.get('url') else base_url
@@ -154,7 +155,7 @@ def make_patient(pid, patient_info):
         },
         "identifier": [
           {
-            "system": "http://example.org/MIN",
+            "system": "http://clinfhir.com/fhir/NamingSystem/identifier",
             "value": ""
           }
         ],
@@ -167,6 +168,8 @@ def make_patient(pid, patient_info):
         "address": []
       }
     }
+    if checkExists("identifier", patient_info):
+        patient["resource"]["identifier"][0]["value"] = patient_info["identifier"]
     if checkExists("birthdate", patient_info):
         patient["resource"]["birthDate"] = patient_info["birthdate"]
     if checkExists("family", patient_info):
