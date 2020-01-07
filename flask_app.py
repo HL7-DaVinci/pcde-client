@@ -59,9 +59,9 @@ def get_comreq():
 @app.route('/postcomreqb')
 def post_comreqb():
     headers = {'Accept' : 'application/json', 'Content-Type' : 'application/json'}
-    pid = 1#request.args.get('pid')
-    rid = 2#request.args.get('rid')
-    sid = 3#request.args.get('sid')
+    pid = 1
+    rid = 2
+    sid = 3
     given = request.args.get('given')
     family = request.args.get('family')
     bdate = request.args.get('birthdate')
@@ -73,7 +73,6 @@ def post_comreqb():
     url += 'PCDE'
     r = requests.post(url, json = req_data, headers=headers, verify=False)
     json_data = json.loads(r.text)
-    #print (json_data["payload"][0]["contentAttachment"]["data"])
     encoding = str(json_data["payload"][0]["contentAttachment"]["data"])
     json_data["payload"][0]["contentAttachment"]["data"] = str(base64.b64decode(encoding))
     json_data["status_code"] = r.status_code
