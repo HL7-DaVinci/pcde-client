@@ -7,8 +7,9 @@ $(function() {
     given = $("#given").val();
     family = $("#family").val();
     bdate = $("#bdate").val();
+    identifier = $("#identifier").val();
     url = $("#url").val().replace(/\//g, '%2F');
-    $.getJSON('/postcomreqb?given='+given+'&family='+family+'&birthdate='+bdate+'&url='+url,
+    $.getJSON('/postcomreqb?identifier='+identifier+'&given='+given+'&family='+family+'&birthdate='+bdate+'&url='+url,
         function(data) {
           console.log(data)
           var div = "<div><h2>"+data["status_code"]+"</h2><h2>"+data["resourceType"]+"</h2>";
