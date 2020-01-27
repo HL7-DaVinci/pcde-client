@@ -32,7 +32,7 @@ def receiveBundle():
     data = request.data
     last_bundle = data
     print(data)
-    return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+    return json.dumps(data), 200, {'ContentType':'application/json'}
 @app.route('/getlastbundle')
 def get_last_bundle():
     json_data = json.loads(last_bundle)
