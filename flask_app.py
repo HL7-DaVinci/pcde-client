@@ -6,6 +6,8 @@ import base64
 app = Flask(__name__)
 headers = {'Accept' : 'application/json', 'Content-Type' : 'application/json'}
 base_url = 'https://davinci-pcde-ri.logicahealth.org/fhir/'#'http://localhost:8080/fhir/'#
+client_url = 'https://davinci-pcde-client.logicahealth.org/'#'https://davinci-pcde-ri.logicahealth.org/fhir/'##'http://localhost:5000/'#
+return_endpoint = client_url + 'receiveBundle'
 @app.route('/')
 def index(name=None):
     return render_template('index.html', name=name)
@@ -24,6 +26,12 @@ def comreqb(name=None):
 def bundle(name=None):
     return render_template('bundle.html', name=name)
 
+@app.route('/receiveBundle', methods=['GET', 'POST'])
+def receiveBundle():
+    data = request.data
+    print(data)
+    return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+
 @app.route('/getpatient')
 def get_patient():
     given = request.args.get('given')
@@ -32,7 +40,7 @@ def get_patient():
     url = request.args.get('url').replace("%2F", "/") if request.args.get('url') else base_url
     url += 'Patient?given='+given+'&family='+family+'&birthdate='+bdate
     r = requests.get(url, headers=headers, verify=False)
-    print (r)
+    #print (r)
     json_data = json.loads(r.text)
     return jsonify(**json_data)
 @app.route('/getbundle')
@@ -41,9 +49,9 @@ def get_bundle():
     id = request.args.get('id')
     url = request.args.get('url').replace("%2F", "/") if request.args.get('url') else base_url
     url += 'Bundle/' + id
-    print (url)
+    #print (url)
     r = requests.get(url, headers=headers, verify=False)
-    print (r)
+    #print (r)
     json_data = json.loads(r.text)
     return jsonify(**json_data)
 @app.route('/getcomreq')
@@ -53,7 +61,7 @@ def get_comreq():
     url = request.args.get('url').replace("%2F", "/") if request.args.get('url') else base_url
     url += 'CommunicationRequest/' + id
     r = requests.get(url, headers=headers, verify=False)
-    print (r)
+    #print (r)
     json_data = json.loads(r.text)
     return jsonify(**json_data)
 @app.route('/postcomreqb')
@@ -68,7 +76,7 @@ def post_comreqb():
     identifier = request.args.get('identifier')
     patient_info = {"given":given, "family":family, "birthdate":bdate, "identifier": identifier}
     req_data = make_bundle_request(pid, sid, rid, patient_info)
-    print(req_data)
+    #print(req_data)
     url = request.args.get('url').replace("%2F", "/") if request.args.get('url') else base_url
     url += 'PCDE'
     r = requests.post(url, json = req_data, headers=headers, verify=False)
@@ -76,7 +84,7 @@ def post_comreqb():
     encoding = str(json_data["payload"][0]["contentAttachment"]["data"])
     json_data["payload"][0]["contentAttachment"]["data"] = str(base64.b64decode(encoding))
     json_data["status_code"] = r.status_code
-    print(r.text)
+    #print(r.text)
     return jsonify(**json_data)
 @app.route('/postcomreq')
 def post_comreq():
@@ -93,8 +101,8 @@ def post_comreq():
     #print (json_data["payload"][0]["contentAttachment"]["data"])
     encoding = str(json_data["payload"][0]["contentAttachment"]["data"])
     json_data["payload"][0]["contentAttachment"]["data"] = str(base64.b64decode(encoding))
-    print("get this")
-    print(r.text)
+    #print("get this")
+    #print(r.text)
     return jsonify(**json_data)
 @app.route('/favicon.ico')
 def favicon():
@@ -215,11 +223,20 @@ def make_bundle_request(pid, sid, rid, patient_info):
           "resource": make_request(pid, sid, rid)},
           make_patient(pid, patient_info),
           make_org(sid, "MARYLAND CAPITAL INSURANCE COMPANY"),
-          make_org(rid, "MARYLAND GLOBAL INSURANCE COMPANY")
+          make_org(rid, "MARYLAND GLOBAL INSURANCE COMPANY"),
+          make_endpoint(5)
         ]
         }
     return comreq
-
+# NOTE: UPDATE THIS TO HANDLE URL CORRECTLY
+def make_endpoint(id):
+    return {
+        "fullUrl": "http://example.org/fhir/Endpoint/" + str(id),
+        "resource": {
+            "resourceType" : "Endpoint",
+            "address" : str(return_endpoint)
+        }
+    }
 def test_address():
     return [
     {
