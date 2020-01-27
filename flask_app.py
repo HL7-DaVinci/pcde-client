@@ -30,6 +30,7 @@ def bundle(name=None):
 @app.route('/receiveBundle', methods=['GET', 'POST'])
 def receiveBundle():
     data = request.data
+    global last_bundle
     last_bundle = data
     print(data)
     return json.dumps(data), 200, {'ContentType':'application/json'}
