@@ -33,6 +33,17 @@ $(function() {
     return false;
   });
 });
+$(function() {
+  $('#gc').bind('click', function() {
+    //$("#display").html("<div></div>");
+    console.log("GETTING THINGS")
+    $.getJSON('/getlastbundle',
+        function(data) {
+          console.log(data)
+    });
+    return false;
+  });
+});
 function formatResource(data) {
     let formatter = null;
     if (data["resourceType"] == "OperationOutcome") {

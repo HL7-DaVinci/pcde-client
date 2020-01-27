@@ -8,6 +8,7 @@ headers = {'Accept' : 'application/json', 'Content-Type' : 'application/json'}
 base_url = 'https://davinci-pcde-ri.logicahealth.org/fhir/'#'http://localhost:8080/fhir/'#
 client_url = 'https://davinci-pcde-client.logicahealth.org/'#'https://davinci-pcde-ri.logicahealth.org/fhir/'##'http://localhost:5000/'#
 return_endpoint = client_url + 'receiveBundle'
+last_bundle = '{"Status":"None"}'
 @app.route('/')
 def index(name=None):
     return render_template('index.html', name=name)
@@ -29,9 +30,13 @@ def bundle(name=None):
 @app.route('/receiveBundle', methods=['GET', 'POST'])
 def receiveBundle():
     data = request.data
+    last_bundle = data
     print(data)
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
-
+@app.route('/getlastbundle')
+def get_last_bundle():
+    json_data = json.loads(last_bundle)
+    return jsonify(**json_data)
 @app.route('/getpatient')
 def get_patient():
     given = request.args.get('given')
