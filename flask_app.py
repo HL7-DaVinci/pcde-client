@@ -37,8 +37,11 @@ def receiveBundle():
 @app.route('/getlastbundle')
 def get_last_bundle():
     json_data = json.loads(last_bundle)
-    encoding = str(json_data["entry"][0]["payload"][0]["contentAttachment"]["data"])
-    json_data["entry"][0]["payload"][0]["contentAttachment"]["data"] = str(base64.b64decode(encoding))
+    try:
+        encoding = str(json_data["entry"][0]["payload"][0]["contentAttachment"]["data"])
+        json_data["entry"][0]["payload"][0]["contentAttachment"]["data"] = str(base64.b64decode(encoding))
+    except Exception as e:
+        print e
     return jsonify(**json_data)
 @app.route('/getpatient')
 def get_patient():
