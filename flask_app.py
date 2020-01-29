@@ -38,8 +38,8 @@ def receiveBundle():
 def get_last_bundle():
     json_data = json.loads(last_bundle)
     try:
-        encoding = str(json_data["entry"][0]["payload"][0]["contentAttachment"]["data"])
-        json_data["entry"][0]["payload"][0]["contentAttachment"]["data"] = str(base64.b64decode(encoding))
+        encoding = str(json_data["entry"][0]["resource"]["payload"][0]["contentAttachment"]["data"])
+        json_data["entry"][0]["resource"]["payload"][0]["contentAttachment"]["data"] = str(base64.b64decode(encoding))
     except Exception as e:
         print e
     return jsonify(**json_data)

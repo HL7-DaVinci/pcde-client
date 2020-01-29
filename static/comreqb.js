@@ -40,7 +40,7 @@ $(function() {
     $.getJSON('/getlastbundle',
         function(data) {
           console.log(data)
-          communication = data["entry"][0]
+          communication = data["entry"][0]["resource"]
           var div = "<div><h2>"+communication["status_code"]+"</h2><h2>"+communication["resourceType"]+"</h2>";
           console.log(communication["status_code"])
           if (communication["status_code"] == 200) {
