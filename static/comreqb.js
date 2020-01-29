@@ -11,7 +11,7 @@ $(function() {
     url = $("#url").val().replace(/\//g, '%2F');
     $.getJSON('/postcomreqb?identifier='+identifier+'&given='+given+'&family='+family+'&birthdate='+bdate+'&url='+url,
         function(data) {
-          console.log(data)
+          //console.log(data)
           var div = "<div><h2>"+data["status_code"]+"</h2><h2>"+data["resourceType"]+"</h2>";
           console.log(data["status_code"])
           if (data["status_code"] == 200) {
@@ -26,7 +26,7 @@ $(function() {
             div += "<h3>Payload: "+ data["payload"][0]["contentAttachment"]["data"]+ "</h3>";
           }
           div += "</div>";
-          $("#display").html(div);
+          //$("#display").html(div);
           //formatter = formatResource(data);
           //$("#json").html(syntaxHighlight(data));
     });
@@ -40,6 +40,23 @@ $(function() {
     $.getJSON('/getlastbundle',
         function(data) {
           console.log(data)
+          communication = data["entry"][0]
+          var div = "<div><h2>"+communication["status_code"]+"</h2><h2>"+communication["resourceType"]+"</h2>";
+          console.log(communication["status_code"])
+          if (communication["status_code"] == 200) {
+              var div = "<div><h2>"+communication["resourceType"]+"</h2>";
+              div += "<h3>Sender: "+ communication["sender"]["reference"]+ "</h3>";
+              div += "<h3>Recipient: "+ communication["recipient"][0]["reference"] + "</h3>";
+              div += "<h3>Subject: "+ communication["subject"]["reference"]+ "</h3>";
+              div += "<h3>Payload: "+ communication["payload"][0]["contentAttachment"]["communication"]+ "</h3>";
+          } else {
+            div += "<h3>Sender: "+ communication["sender"]["reference"]+ "</h3>";
+            div += "<h3>Recipient: "+ communication["recipient"][0]["reference"] + "</h3>";
+            div += "<h3>Payload: "+ communication["payload"][0]["contentAttachment"]["data"]+ "</h3>";
+          }
+          div += "</div>";
+          $("#display").html(div);
+
     });
     return false;
   });
