@@ -8,7 +8,12 @@ headers = {'Accept' : 'application/json', 'Content-Type' : 'application/json'}
 base_url = 'https://davinci-pcde-ri.logicahealth.org/fhir/'#'http://localhost:8080/fhir/'#
 client_url = 'https://davinci-pcde-client.logicahealth.org/'#'https://davinci-pcde-ri.logicahealth.org/fhir/'##'http://localhost:5000/'#
 return_endpoint = client_url + 'receiveBundle'
-last_bundle = '{"Status":"None"}'
+
+# Simple method to make data tempory
+# NOTE: Do not use in production
+last_bundle = '{"text": "Bundle Not Found","status_code":"404"}'
+bundle_queue = []
+bundle_entries = {}
 @app.route('/')
 def index(name=None):
     return render_template('index.html', name=name)
@@ -30,18 +35,30 @@ def bundle(name=None):
 @app.route('/receiveBundle', methods=['GET', 'POST'])
 def receiveBundle():
     data = request.data
-    global last_bundle
-    last_bundle = data
+    global bundle_queue
+    global bundle_entries
+    bundle_entries[bundle_queue.pop_left()] = data
     print(data)
     return json.dumps(data), 200, {'ContentType':'application/json'}
 @app.route('/getlastbundle')
 def get_last_bundle():
-    json_data = json.loads(last_bundle)
-    try:
-        encoding = str(json_data["entry"][0]["resource"]["payload"][0]["contentAttachment"]["data"])
-        json_data["entry"][0]["resource"]["payload"][0]["contentAttachment"]["data"] = str(base64.b64decode(encoding))
-    except Exception as e:
-        print e
+    global last_bundle
+    global bundle_entries
+    global bundle_queue
+    given = request.args.get('given')
+    family = request.args.get('family')
+    bdate = request.args.get('birthdate')
+    identifier = request.args.get('identifier')
+    bundle_key = (given+family+bdate+identifier)
+    if (bundle_key in bundle_entries.keys()):
+        json_data = json.loads(bundle_entries.pop(bundle_key))
+        try:
+            encoding = str(json_data["entry"][0]["resource"]["payload"][0]["contentAttachment"]["data"])
+            json_data["entry"][0]["resource"]["payload"][0]["contentAttachment"]["data"] = str(base64.b64decode(encoding))
+        except Exception as e:
+            print(e)
+    else:
+        json_data = json.loads(last_bundle)
     return jsonify(**json_data)
 @app.route('/getpatient')
 def get_patient():
@@ -77,6 +94,9 @@ def get_comreq():
     return jsonify(**json_data)
 @app.route('/postcomreqb')
 def post_comreqb():
+    global bundle_entries
+    global bundle_queue
+    global last_bundle
     headers = {'Accept' : 'application/json', 'Content-Type' : 'application/json'}
     pid = 1
     rid = 2
@@ -85,6 +105,8 @@ def post_comreqb():
     family = request.args.get('family')
     bdate = request.args.get('birthdate')
     identifier = request.args.get('identifier')
+    bundle_key = given+family+bdate+identifier
+    bundle_queue.append(bundle_key)
     patient_info = {"given":given, "family":family, "birthdate":bdate, "identifier": identifier}
     req_data = make_bundle_request(pid, sid, rid, patient_info)
     #print(req_data)

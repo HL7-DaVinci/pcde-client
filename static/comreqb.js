@@ -24,9 +24,10 @@ $(function() {
             div += "<h3>Sender: "+ data["sender"]["reference"]+ "</h3>";
             div += "<h3>Recipient: "+ data["recipient"][0]["reference"] + "</h3>";
             div += "<h3>Payload: "+ data["payload"][0]["contentAttachment"]["data"]+ "</h3>";
+            div += "</div>";
+            $("#display").html(div);
           }
-          div += "</div>";
-          //$("#display").html(div);
+          //
           //formatter = formatResource(data);
           //$("#json").html(syntaxHighlight(data));
     });
@@ -35,26 +36,34 @@ $(function() {
 });
 $(function() {
   $('#gc').bind('click', function() {
-    //$("#display").html("<div></div>");
-    console.log("GETTING THINGS")
-    $.getJSON('/getlastbundle',
+    given = $("#given").val();
+    family = $("#family").val();
+    bdate = $("#bdate").val();
+    identifier = $("#identifier").val();
+    $.getJSON('/getlastbundle?identifier='+identifier+'&given='+given+'&family='+family+'&birthdate='+bdate,
         function(data) {
           console.log(data)
-          communication = data["entry"][0]["resource"]
-          var div = "<div><h2>"+communication["status_code"]+"</h2><h2>"+communication["resourceType"]+"</h2>";
-          console.log(communication["status_code"])
-          if (communication["status_code"] == 200) {
-              var div = "<div><h2>"+communication["resourceType"]+"</h2>";
-              div += "<h3>Sender: "+ communication["sender"]["reference"]+ "</h3>";
-              div += "<h3>Recipient: "+ communication["recipient"][0]["reference"] + "</h3>";
-              div += "<h3>Subject: "+ communication["subject"]["reference"]+ "</h3>";
-              div += "<h3>Payload: "+ communication["payload"][0]["contentAttachment"]["communication"]+ "</h3>";
+          var div;
+          if (data["resourceType"] === "Bundle") {
+              communication = data["entry"][0]["resource"]
+              div = "<div><h2>"+communication["status_code"]+"</h2><h2>"+communication["resourceType"]+"</h2>";
+              console.log(communication["status_code"])
+              if (communication["status_code"] == 200) {
+                  var div = "<div><h2>"+communication["resourceType"]+"</h2>";
+                  div += "<h3>Sender: "+ communication["sender"]["reference"]+ "</h3>";
+                  div += "<h3>Recipient: "+ communication["recipient"][0]["reference"] + "</h3>";
+                  div += "<h3>Subject: "+ communication["subject"]["reference"]+ "</h3>";
+                  div += "<h3>Payload: "+ communication["payload"][0]["contentAttachment"]["communication"]+ "</h3>";
+              } else {
+                div += "<h3>Sender: "+ communication["sender"]["reference"]+ "</h3>";
+                div += "<h3>Recipient: "+ communication["recipient"][0]["reference"] + "</h3>";
+                div += "<h3>Subject: "+ communication["subject"]["reference"]+ "</h3>";
+                div += "<h3>Payload: "+ communication["payload"][0]["contentAttachment"]["data"]+ "</h3>";
+              }
+              div += "</div>";
           } else {
-            div += "<h3>Sender: "+ communication["sender"]["reference"]+ "</h3>";
-            div += "<h3>Recipient: "+ communication["recipient"][0]["reference"] + "</h3>";
-            div += "<h3>Payload: "+ communication["payload"][0]["contentAttachment"]["data"]+ "</h3>";
+              div = "<div>" + syntaxHighlight(data) + "</div>";
           }
-          div += "</div>";
           $("#display").html(div);
 
     });
@@ -82,7 +91,8 @@ function formatResource(data) {
     }
     return formatter;
 }
-function syntaxHighlight(json) {
+function syntaxHighlight(json_obj) {
+    var json = JSON.stringify(json_obj)
     json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
         var cls = 'number';
