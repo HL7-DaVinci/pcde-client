@@ -37,19 +37,21 @@ def receiveBundle():
     data = request.data
     global bundle_queue
     global bundle_entries
-    bundle_entries[bundle_queue.pop_left()] = data
-    print(data)
+    #print(bundle_queue)
+    bundle_entries[bundle_queue.pop(0)] = data
+    #print(bundle_entries)
+    # print(data)
     return json.dumps(data), 200, {'ContentType':'application/json'}
 @app.route('/getlastbundle')
 def get_last_bundle():
     global last_bundle
     global bundle_entries
-    global bundle_queue
     given = request.args.get('given')
     family = request.args.get('family')
     bdate = request.args.get('birthdate')
     identifier = request.args.get('identifier')
     bundle_key = (given+family+bdate+identifier)
+    #print(bundle_entries)
     if (bundle_key in bundle_entries.keys()):
         json_data = json.loads(bundle_entries.pop(bundle_key))
         try:
@@ -77,9 +79,7 @@ def get_bundle():
     id = request.args.get('id')
     url = request.args.get('url').replace("%2F", "/") if request.args.get('url') else base_url
     url += 'Bundle/' + id
-    #print (url)
     r = requests.get(url, headers=headers, verify=False)
-    #print (r)
     json_data = json.loads(r.text)
     return jsonify(**json_data)
 @app.route('/getcomreq')
@@ -94,7 +94,6 @@ def get_comreq():
     return jsonify(**json_data)
 @app.route('/postcomreqb')
 def post_comreqb():
-    global bundle_entries
     global bundle_queue
     global last_bundle
     headers = {'Accept' : 'application/json', 'Content-Type' : 'application/json'}
@@ -107,6 +106,7 @@ def post_comreqb():
     identifier = request.args.get('identifier')
     bundle_key = given+family+bdate+identifier
     bundle_queue.append(bundle_key)
+    print(bundle_queue)
     patient_info = {"given":given, "family":family, "birthdate":bdate, "identifier": identifier}
     req_data = make_bundle_request(pid, sid, rid, patient_info)
     #print(req_data)
