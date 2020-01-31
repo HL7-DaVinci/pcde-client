@@ -9,6 +9,7 @@ $(function() {
         function(data) {
           console.log(data)
           formatter = formatResource(data);
+          formatter = "<div class='card'>" + formatter + "</div>";
           $("#display").html(formatter);
     });
     return false;
