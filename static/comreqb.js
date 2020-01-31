@@ -79,7 +79,9 @@ $(function() {
               }
               senderDiv += "</table>";
               senderDiv += "</div>";
-              div = "<div class='card'><h2>"+communication["resourceType"]+"</h2>";
+              div = patientDiv;
+              div += senderDiv;
+              div += "<div class='card'><h2>"+communication["resourceType"]+"</h2>";
               console.log(communication["status_code"])
               if (communication["status_code"] == 200) {
                   var div = "<div><h2>"+communication["resourceType"]+"</h2>";
