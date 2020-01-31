@@ -46,7 +46,7 @@ $(function() {
           var div;
           if (data["resourceType"] === "Bundle") {
               communication = data["entry"][0]["resource"]
-              patient = data["entry"][1]
+              patient = data["entry"][1]["resource"]
 
               patientDiv = "<div class='card'>"
               patientDiv += "<table style='width:100%'>";
@@ -63,9 +63,9 @@ $(function() {
               patientDiv += "</table>";
               patientDiv += "</div>";
 
-              recipient = data["entry"][2]
+              recipient = data["entry"][2]["resource"]
 
-              sender = data["entry"][3]
+              sender = data["entry"][3]["resource"]
               senderDiv = "<div class='card'>"
               senderDiv += "<table style='width:100%'>";
               senderDiv += "<tr><td>Name: </td><td>"+sender["name"]+"</td></tr>";
