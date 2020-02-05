@@ -48,7 +48,7 @@ $(function() {
               communication = data["entry"][0]["resource"]
               patient = data["entry"][1]["resource"]
 
-              patientDiv = "<div class='card'>"
+              patientDiv = "<div class='card'><h2>Patient</h2>"
               patientDiv += "<table style='width:100%'>";
               patientDiv += "<tr><td>Name: </td><td>"+patient["name"][0]["given"] + " "+ patient["name"][0]["family"]+"</td></tr>";
               if ('gender' in patient) {
@@ -66,35 +66,24 @@ $(function() {
               recipient = data["entry"][2]["resource"]
 
               sender = data["entry"][3]["resource"]
-              senderDiv = "<div class='card'>"
+              senderDiv = "<div class='card'><h2>Previous Payer</h2>"
               senderDiv += "<table style='width:100%'>";
               senderDiv += "<tr><td>Name: </td><td>"+sender["name"]+"</td></tr>";
+              if ('telecom' in sender) {
+                  for (var telecom in sender['telecom']) {
+                      senderDiv += "<tr><td>"+capitalizeFirst(telecom['system'])+": </td><td>"+telecom["value"]+"</td></tr>";
+                  }
+              }
               if ('address' in sender) {
                   senderDiv += "<tr><td>Address: </td><td>"+sender["address"][0]["line"][0] + " "+ sender["address"][0]["city"]+ ", "+ sender["address"][0]["state"]+ ", "+ sender["address"][0]["postalCode"]+"</td></tr>";
               }
-              if ('telecom' in sender) {
-                  for (var telecom in sender['telecom']) {
-                      senderDiv += "<tr><td>"+telecom['system']+" </td><td>"+telecom["value"]+"</td></tr>";
-                  }
-              }
+
               senderDiv += "</table>";
               senderDiv += "</div>";
-              div = patientDiv;
-              div += senderDiv;
+              div = senderDiv;
+              div += patientDiv;
               div += "<div class='card'><h2>"+communication["resourceType"]+"</h2>";
-              console.log(communication["status_code"])
-              if (communication["status_code"] == 200) {
-                  var div = "<div><h2>"+communication["resourceType"]+"</h2>";
-                  div += "<h3>Sender: "+ communication["sender"]["reference"]+ "</h3>";
-                  div += "<h3>Recipient: "+ communication["recipient"][0]["reference"] + "</h3>";
-                  div += "<h3>Subject: "+ communication["subject"]["reference"]+ "</h3>";
-                  div += "<h3>Payload: "+ communication["payload"][0]["contentAttachment"]["communication"]+ "</h3>";
-              } else {
-                div += "<h3>Sender: "+ communication["sender"]["reference"]+ "</h3>";
-                div += "<h3>Recipient: "+ communication["recipient"][0]["reference"] + "</h3>";
-                div += "<h3>Subject: "+ communication["subject"]["reference"]+ "</h3>";
-                div += "<h3>Payload: "+ communication["payload"][0]["contentAttachment"]["data"]+ "</h3>";
-              }
+              div += "<h3>Payload: "+ communication["payload"][0]["contentAttachment"]["data"]+ "</h3>";
               div += "</div>";
           } else {
               div = "<div>" + syntaxHighlight(data) + "</div>";
@@ -105,6 +94,9 @@ $(function() {
     return false;
   });
 });
+function capitalizeFirst(str) {
+    return str.replace(/^w/, c => c.toUpperCase());
+}
 function formatResource(data) {
     let formatter = null;
     if (data["resourceType"] == "OperationOutcome") {
