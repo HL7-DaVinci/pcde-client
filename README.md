@@ -1,5 +1,7 @@
-# davinci-pcde-ri
-Reference Implementation for the Da Vinci Payor Coverage Decision Exchange specification
+# Client Location
+The client can be found live and running at https://davinci-pcde-client.logicahealth.org/
+# The client can also be run locally
+- Running locally will allow for some simple testing however, it is not possible for the RI to post a the PCDE bundle to a locally running instance of the client
 # Requirements
 - python 3.7
 - pip3
@@ -29,6 +31,14 @@ There are several test examples already built into the server for interacting wi
 - CommunicationRequest
   * Only one PCDE bundle currently exists on the server so the patient ID needs to be 14
   * The Organization IDs should be 16 and 17
+- Bundle Communication Request
+  * Simulates a real PCDE interaction
+  * When interacting with the PCDE RI there are four potential responses
+  * * First, searching for the patient Joe Smith. This will result in the  PCDE bundle being posted back to the client. After a few seconds, the Get Communication Button can be pressed to pull the posted bundle to be displayed
+  * * Second, searching for the patient Jeff Smith. This will result in a 413 because multiple patients will match
+  the demographics.
+  * * Third, searching for the patient Jeff Smith with the birthday or ID included will result in a 200, but neither one has a PCDE bundle so when the Get Communication Button is pressed it will result in a 404
+  * * Fourth, searching for any patient not in the will result in a 404
 # How the client works
 The client runs on its own server locally and the requests are made through the backend. The required
 fields for each search are combined into a single request to be made to the reference server. Some of

@@ -111,7 +111,6 @@ def post_comreqb():
     req_data = make_bundle_request(pid, sid, rid, patient_info)
     #print(req_data)
     url = request.args.get('url').replace("%2F", "/") if request.args.get('url') else base_url
-    url += 'PCDE'
     r = requests.post(url, json = req_data, headers=headers, verify=False)
     json_data = json.loads(r.text)
     encoding = str(json_data["payload"][0]["contentAttachment"]["data"])
