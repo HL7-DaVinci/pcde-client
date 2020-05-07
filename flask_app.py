@@ -20,6 +20,9 @@ def index(name=None):
 @app.route('/Patient')
 def patient(name=None):
     return render_template('patient.html', name=name)
+@app.route('/memberMatch')
+def memberMatch(name=None):
+    return render_template('memberMatch.html', name=name)
 @app.route('/CommunicationRequest')
 def comreq(name=None):
     return render_template('comreq.html', name=name)
@@ -120,7 +123,6 @@ def post_comreqb():
     return jsonify(**json_data)
 @app.route('/postcomreq')
 def post_comreq():
-    headers = {'Accept' : 'application/json', 'Content-Type' : 'application/json'}
     pid = request.args.get('pid')
     rid = request.args.get('rid')
     sid = request.args.get('sid')
@@ -135,6 +137,20 @@ def post_comreq():
     json_data["payload"][0]["contentAttachment"]["data"] = str(base64.b64decode(encoding))
     #print("get this")
     #print(r.text)
+    return jsonify(**json_data)
+@app.route('/member-match')
+def member_match():
+    given = request.args.get('given')
+    family = request.args.get('family')
+    bdate = request.args.get('birthdate')
+    param_data = get_member_match(given, family, bdate)
+    url = request.args.get('url').replace("%2F", "/") if request.args.get('url') else base_url
+    url += 'Patient/$member-match'
+    print(param_data)
+    r = requests.post(url, json = param_data, headers=headers, verify=False)
+    print("\n\n\nRequest\n")
+    print (r)
+    json_data = json.loads(r.text)
     return jsonify(**json_data)
 @app.route('/favicon.ico')
 def favicon():
@@ -281,6 +297,217 @@ def test_address():
       "country": "US"
     }
   ]
+def get_member_match(given="", family="", birthDate=""):
+    return {
+    "resourceType": "Parameters",
+    "parameter": [
+      {
+        "name": "exact",
+        "valueBoolean": True
+      },
+      {
+        "name": "MemberPatient",
+        "resource": {
+          "resourceType": "Patient",
+          "id": "1",
+          "name": [
+            {
+              "use": "official",
+              "family": family,
+              "given": [given]
+            }
+          ],
+          "gender": "male",
+          "birthDate": birthDate
+        }
+      },
+      {
+        "name": "OldCoverage",
+        "resource": {
+          "resourceType": "Coverage",
+          "id": "9876B1",
+          "text": {
+            "status": "generated",
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">A human-readable rendering of the coverage</div>"
+          },
+          "contained": [
+            {
+              "resourceType" : "Organization",
+              "id" : "Organization/2",
+              "name" : "Old Health Plan",
+              "endpoint" : [
+                {
+                  "reference" : "http://www.oldhealthplan.com"
+                }
+             ]
+            }
+            ],
+          "identifier": [
+            {
+              "system": "http://oldhealthplan.example.com",
+              "value": "12345"
+            }
+          ],
+          "status": "draft",
+          "beneficiary": {
+            "reference": "Patient/4"
+          },
+          "period": {
+            "start": "2011-05-23",
+            "end": "2012-05-23"
+          },
+          "payor": [
+            {
+              "reference": "#Organization/2"
+            }
+          ],
+          "class": [
+            {
+              "type": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/coverage-class",
+                    "code": "group"
+                  }
+                ]
+              },
+              "value": "CB135"
+            },
+            {
+              "type": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/coverage-class",
+                    "code": "plan"
+                  }
+                ]
+              },
+              "value": "B37FC"
+            },
+            {
+              "type": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/coverage-class",
+                    "code": "subplan"
+                  }
+                ]
+              },
+              "value": "P7"
+            },
+            {
+              "type": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/coverage-class",
+                    "code": "class"
+                  }
+                ]
+              },
+              "value": "SILVER"
+            }
+          ]
+        }
+      },
+      {
+        "name": "NewCoverage",
+        "resource": {
+          "resourceType": "Coverage",
+          "id": "AA87654",
+          "contained": [
+              {
+                "resourceType" : "Organization",
+                "id" : "Organization/3",
+                "name" : "New Health Plan",
+                "endpoint" : [
+                  {
+                    "reference" : "http://www.newhealthplan.com"
+                  }
+                ]
+              }
+            ],
+            "identifier": [
+            {
+              "system": "http://newealthplan.example.com",
+              "value": "234567"
+            }
+          ],
+          "status": "active",
+          "beneficiary": {
+            "reference": "Patient/1"
+          },
+          "period": {
+            "start": "2020-04-01",
+            "end": "2021-03-31"
+          },
+          "payor": [
+            {
+              "reference": "#Organization/3"
+            }
+          ],
+          "class": [
+            {
+              "type": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/coverage-class",
+                    "code": "group"
+                  }
+                ]
+              },
+              "value": "A55521",
+              "name": "New Health Plan Group"
+            },
+            {
+              "type": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/coverage-class",
+                    "code": "subgroup"
+                  }
+                ]
+              },
+              "value": "456"
+            },
+            {
+              "type": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/coverage-class",
+                    "code": "plan"
+                  }
+                ]
+              },
+              "value": "99012"
+            },
+            {
+              "type": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/coverage-class",
+                    "code": "subplan"
+                  }
+                ]
+              },
+              "value": "A4"
+            },
+            {
+              "type": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/coverage-class",
+                    "code": "class"
+                  }
+                ]
+              },
+              "value": "GOLD"
+            }
+          ]
+        }
+      }
+    ]
+  }
+
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0')

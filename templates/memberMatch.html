@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<title>PCDE Client</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/static/main.css">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-black.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="/static/membermatch.js"></script>
+<style>
+html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif;}
+.w3-sidebar {
+  z-index: 3;
+  width: 250px;
+  top: 43px;
+  bottom: 0;
+  height: inherit;
+}
+</style>
+<script>
+    $(function(){
+      $("#includedContent").load("/static/header.html");
+    });
+</script>
+<body>
+
+<div id="includedContent"></div>
+
+<!-- Main content: shift it to the right by 250 pixels when the sidebar is visible -->
+<div class="w3-main" style="margin-left:250px">
+
+  <div class="w3-row w3-padding-64">
+    <div class="w3-twothird w3-container">
+      <h1 class="w3-text-teal">PCDE Client</h1>
+      <p>This server provides a client for interacting with the <a href="https://davinci-pcde-ri.logicahealth.org/">Da Vinci Payer Coverage Decision Exchange Reference Implementation.</a></p>
+      <p>To use a different part of the client click on one of links on the side menu.</p>
+    </div>
+
+  </div>
+
+  <div class="w3-row">
+    <div class="w3-twothird w3-container">
+      <h1 class="w3-text-teal">FHIR Endpoint</h1>
+      <p>All requests are made to the endpoint: <input id="url" class="text-input endpoint" type="text" name="" value="https://davinci-pcde-ri.logicahealth.org/fhir/" placeholder="https://davinci-pcde-ri.logicahealth.org/fhir/"></p>
+        <p>The default endpoint is the reference server: <a href="https://davinci-pcde-ri.logicahealth.org/fhir/">https://davinci-pcde-ri.logicahealth.org/fhir/</a></p>
+      <p>To make more direct requests you can visit the reference server or post your own fhir requests</p>
+    </div>
+
+  </div>
+
+  <div class="w3-row w3-padding-64">
+    <div class="w3-twothird w3-container">
+      <form>
+        <h1 class="w3-text-teal">Member Match</h1><br>
+        <table>
+        <tr><td><p class="w3-text-teal">Given Name</p></td><td><input id="given" class="text-input" type="text" name="" value="" placeholder="enter the given name"></td></tr>
+        <tr><td><p class="w3-text-teal">Family Name</p></td><td><input id="family" class="text-input" type="text" name="" value="" placeholder="enter the family name"></td></tr>
+        <tr><td><p class="w3-text-teal">Birth Date</p></td><td><input id="bdate" class="text-input" type="text" name="" value="" placeholder="enter the birth date"></td></tr>
+        </table>
+        <button id="gp" class="w3-hover-white submit-button" type="submit" name="bundle">Member Match</button>
+      </form>
+    </div>
+
+
+  </div>
+  <div id="display" class="indent"></div>
+  <br>
+  <br>
+  <pre id="json"></pre>
+  <br>
+  <br>
+  <br>
+  <br>
+  <footer id="myFooter" class="footer">
+    <div class="w3-container w3-theme-l2 w3-padding-32">
+      <h4></h4>
+    </div>
+  </footer>
+
+<!-- END MAIN -->
+</div>
+
+<script>
+// Get the Sidebar
+var mySidebar = document.getElementById("mySidebar");
+
+// Get the DIV with overlay effect
+var overlayBg = document.getElementById("myOverlay");
+
+// Toggle between showing and hiding the sidebar, and add overlay effect
+function w3_open() {
+  if (mySidebar.style.display === 'block') {
+    mySidebar.style.display = 'none';
+    overlayBg.style.display = "none";
+  } else {
+    mySidebar.style.display = 'block';
+    overlayBg.style.display = "block";
+  }
+}
+
+// Close the sidebar with the close button
+function w3_close() {
+  mySidebar.style.display = "none";
+  overlayBg.style.display = "none";
+}
+</script>
+
+</body>
+</html>
