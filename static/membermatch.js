@@ -34,46 +34,43 @@ $(function() {
     return false;
   });
 });
-// function reverseObject(obj) {
-//     let newObj = {}
-//     for (let item in obj) {
-//
-//     }
-// }
 function formatSample(data) {
-  // return "<h3>Full Response</h3><span style=\"white-space: pre-wrap\">"+(JSON.stringify(data, undefined, 4))+"</span>";
   return "<h3>Full Response</h3><span style=\"white-space: pre-wrap\">"+syntaxHighlight((JSON.stringify(data, undefined, 4)))+"</span>";
 }
 function formatResource(data) {
-    let formatter = "<h3>An error occured</h3>";
-    if (data["StatusCode"]) {
-        formatter = "<h3>An error occured received " + data["StatusCode"] + "</h3>";
-    } else if (data["resourceType"] == "OperationOutcome") {
-        formatter = {
-            "resourceType": data["resourceType"],
-            "issue": data["issue"],
-            "text": data["text"]
-        }
-        formatter = syntaxHighlight(JSON.stringify(formatter, undefined, 2))
-    } else if (data["resourceType"] == "Parameters"){
-        formatter = "<h3>Successfully Found Patient Match</h3>";
-        let patient = data["parameter"][1]["resource"]
-        formatter += "<table style='width:100%'>";
-        formatter += "<tr><td>Name: </td><td>"+patient["name"][0]["given"] + " "+ patient["name"][0]["family"]+"</td></tr>";
-        if (patient["birthDate"] != "")
-            formatter += "<tr><td>Birth Date: </td><td>"+patient["birthDate"]+"</td></tr>";
-        if (patient["address"])
-            formatter += "<tr><td>Address: </td><td>"+patient["address"][0]["line"][0] + " "+ patient["address"][0]["city"]+ ", "+ patient["address"][0]["state"]+ ", "+ patient["address"][0]["postalCode"]+"</td></tr>";
-        formatter += "<tr><td>UMB: </td><td>"+patient["identifier"][0]["value"]+"</td></tr>";
-        formatter += "</table>";
-        // formatter += "<h3>Full Coverage</h3><div>"+syntaxHighlight(JSON.stringify(data["parameter"][2], undefined, 2))+"</div>";
-        formatter += "<h3>Full Response</h3><span style=\"white-space: pre-wrap\">"+syntaxHighlight((JSON.stringify(data, undefined, 4)))+"</span>";
+    try {
+      let formatter = "<h3>An error occured</h3>";
+      if (data["StatusCode"]) {
+          formatter = "<h3>An error occured received " + data["StatusCode"] + "</h3>";
+      } else if (data["resourceType"] == "OperationOutcome") {
+          formatter = {
+              "resourceType": data["resourceType"],
+              "issue": data["issue"],
+              "text": data["text"]
+          }
+          formatter = syntaxHighlight(JSON.stringify(formatter, undefined, 2))
+      } else if (data["resourceType"] == "Parameters"){
+          formatter = "<h3>Successfully Found Patient Match</h3>";
+          let patient = data["parameter"][1]["resource"]
+          formatter += "<table style='width:100%'>";
+          formatter += "<tr><td>Name: </td><td>"+patient["name"][0]["given"] + " "+ patient["name"][0]["family"]+"</td></tr>";
+          if (patient["birthDate"] != "")
+              formatter += "<tr><td>Birth Date: </td><td>"+patient["birthDate"]+"</td></tr>";
+          if (patient["address"])
+              formatter += "<tr><td>Address: </td><td>"+patient["address"][0]["line"][0] + " "+ patient["address"][0]["city"]+ ", "+ patient["address"][0]["state"]+ ", "+ patient["address"][0]["postalCode"]+"</td></tr>";
+          if (patient["identifier"])
+              formatter += "<tr><td>UMB: </td><td>"+patient["identifier"][0]["value"]+"</td></tr>";
+          else
+            formatter += "<tr><td>UMB: </td><td>No Identifier was supplied</td></tr>";
+          formatter += "</table>";
+          formatter += "<h3>Full Response</h3><span style=\"white-space: pre-wrap\">"+syntaxHighlight((JSON.stringify(data, undefined, 4)))+"</span>";
+      }
+      return formatter;
+    } catch (err) {
+      return formatSample(data);
     }
-    return formatter;
 }
 function syntaxHighlight(json) {
-    console.log("HIGHLIGHTING")
-    console.log(json)
     json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
         var cls = 'number';
