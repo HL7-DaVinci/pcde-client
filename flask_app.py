@@ -150,10 +150,10 @@ def member_match():
     url += 'Patient/$member-match'
     print(param_data)
     r = requests.post(url, json = param_data, headers=headers, verify=False)
-    print("\n\n\nRequest\n")
-    print (r)
     json_data = json.loads(r.text)
-    if isinstance(json_data, int):
+    if r.status_code != 200:
+        json_data = {"StatusCode" : r.status_code}
+    elif isinstance(json_data, int):
         json_data = {"StatusCode": json_data}
     return jsonify(**json_data)
 @app.route('/sample-mm')

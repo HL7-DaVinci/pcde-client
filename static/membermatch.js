@@ -54,7 +54,7 @@ function formatResource(data) {
           let patient = data["parameter"][1]["resource"]
           formatter += "<table style='width:100%'>";
           formatter += "<tr><td>Name: </td><td>"+patient["name"][0]["given"] + " "+ patient["name"][0]["family"]+"</td></tr>";
-          if (patient["birthDate"] != "")
+          if (patient["birthData"] && patient["birthDate"] != "")
               formatter += "<tr><td>Birth Date: </td><td>"+patient["birthDate"]+"</td></tr>";
           if (patient["address"])
               formatter += "<tr><td>Address: </td><td>"+patient["address"][0]["line"][0] + " "+ patient["address"][0]["city"]+ ", "+ patient["address"][0]["state"]+ ", "+ patient["address"][0]["postalCode"]+"</td></tr>";
