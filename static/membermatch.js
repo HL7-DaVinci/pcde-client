@@ -7,7 +7,7 @@ $(function() {
     mid = $("#mid").val();
     $("#display").html("<div></div>");
     url = $("#url").val().replace(/\//g, '%2F');
-    $.getJSON('/member-match?given='+given+'&family='+family+'&birthdate='+bdate+'&sid='+sid+'&mid'+mid+'&url='+url,
+    $.getJSON('/member-match?given='+given+'&family='+family+'&birthdate='+bdate+'&sid='+sid+'&mid='+mid+'&url='+url,
         function(data) {
           console.log(data)
           formatter = formatResource(data);
@@ -24,7 +24,7 @@ $(function() {
     mid = $("#mid").val();
     $("#display").html("<div></div>");
     url = $("#url").val().replace(/\//g, '%2F');
-    $.getJSON('/sample-mm?given='+given+'&family='+family+'&birthdate='+bdate+'&sid='+sid+'&mid'+mid+'&url='+url,
+    $.getJSON('/sample-mm?given='+given+'&family='+family+'&birthdate='+bdate+'&sid='+sid+'&mid='+mid+'&url='+url,
         function(data) {
           console.log(data)
           formatter = formatSample(data);
