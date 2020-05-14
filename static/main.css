@@ -20,7 +20,7 @@ pre {padding: 5px; margin: 5px; margin-top: 20px; width: 80%;}
 .number { color: darkorange; }
 .boolean { color: blue; }
 .null { color: magenta; }
-.key { color: red; }
+.key { color: black; }
 
 .indent {margin-left: 25px;}
 .overflow {

@@ -143,7 +143,9 @@ def member_match():
     given = request.args.get('given')
     family = request.args.get('family')
     bdate = request.args.get('birthdate')
-    param_data = get_member_match(given, family, bdate)
+    sid = request.args.get('sid')
+    mid = request.args.get('mid')
+    param_data = get_member_match(given, family, bdate, sid, mid)
     url = request.args.get('url').replace("%2F", "/") if request.args.get('url') else base_url
     url += 'Patient/$member-match'
     print(param_data)
@@ -151,7 +153,18 @@ def member_match():
     print("\n\n\nRequest\n")
     print (r)
     json_data = json.loads(r.text)
+    if isinstance(json_data, int):
+        json_data = {"StatusCode": json_data}
     return jsonify(**json_data)
+@app.route('/sample-mm')
+def sample_mm():
+    given = request.args.get('given')
+    family = request.args.get('family')
+    bdate = request.args.get('birthdate')
+    sid = request.args.get('sid')
+    mid = request.args.get('mid')
+    param_data = get_member_match(given, family, bdate, sid, mid)
+    return jsonify(**param_data)
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
@@ -297,8 +310,13 @@ def test_address():
       "country": "US"
     }
   ]
-def get_member_match(given="", family="", birthDate=""):
+def get_identifier(value):
     return {
+              "system": "http://oldhealthplan.example.com",
+              "value": value
+            }
+def get_member_match(given="", family="", birthDate="", sid="", mid=""):
+    parameters = {
     "resourceType": "Parameters",
     "parameter": [
       {
@@ -507,6 +525,13 @@ def get_member_match(given="", family="", birthDate=""):
       }
     ]
   }
+    if (not sid == "") or (not mid == ""):
+        parameters["parameter"][1]["identifier"] = []
+        if not sid == "":
+            parameters["parameter"][1]["identifier"].append(get_identifier(sid))
+        if not mid == "":
+            parameters["parameter"][1]["identifier"].append(get_identifier(mid))
+    return parameters
 
 
 if __name__ == "__main__":
