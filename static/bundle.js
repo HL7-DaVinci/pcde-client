@@ -9,20 +9,23 @@ $(function() {
           formatter = formatResource(data);
           $("#json").html("<h3>Full Bundle</h3>"+syntaxHighlight(JSON.stringify(formatter, undefined, 2)));
           console.log(data);
-          var div = "<div><h2>"+data["entry"][0]["resource"]["title"]+"</h2>";
-          for (var i = 0; i < data["entry"].length; i++) {
-            if (data["entry"][i]["resource"]["resourceType"] == "Patient") {
-              div += "<h3>Patient</h3>"+data["entry"][i]["resource"]["text"]["div"];
-            }
-            else if (data["entry"][i]["resource"]["resourceType"] == "Organization") {
-              div += "<h3>Payor</h3>"+data["entry"][i]["resource"]["text"]["div"];
-            }
-            else if (data["entry"][i]["resource"]["resourceType"] == "CarePlan") {
-              div += "<h3>Care Plan</h3>"+data["entry"][i]["resource"]["text"]["div"];
-            }
+          let div = "";
+          if (data["resourceType"] === "Bundle") {
+              div = "<div><h2>"+data["entry"][0]["resource"]["title"]+"</h2>";
+              for (let i = 0; i < data["entry"].length; i++) {
+                if (data["entry"][i]["resource"]["resourceType"] == "Patient") {
+                  div += "<h3>Patient</h3>"+data["entry"][i]["resource"]["text"]["div"];
+                }
+                else if (data["entry"][i]["resource"]["resourceType"] == "Organization") {
+                  div += "<h3>Payer</h3>"+data["entry"][i]["resource"]["text"]["div"];
+                }
+                else if (data["entry"][i]["resource"]["resourceType"] == "CarePlan") {
+                  div += "<h3>Care Plan</h3>"+data["entry"][i]["resource"]["text"]["div"];
+                }
+              }
+              div += "</div>";
+              $("#display").html(div);
           }
-          div += "</div>";
-          $("#display").html(div);
     });
     return false;
   });
@@ -51,7 +54,7 @@ function formatResource(data) {
 function syntaxHighlight(json) {
     json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
-        var cls = 'number';
+        let cls = 'number';
         if (/^"/.test(match)) {
             if (/:$/.test(match)) {
                 cls = 'key';

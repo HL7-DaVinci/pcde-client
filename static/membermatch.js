@@ -42,6 +42,7 @@ function formatResource(data) {
       let formatter = "<h3>An error occured</h3>";
       if (data["StatusCode"]) {
           formatter = "<h3>An error occured received " + data["StatusCode"] + "</h3>";
+          formatter += formatSample(data);
       } else if (data["resourceType"] == "OperationOutcome") {
           formatter = {
               "resourceType": data["resourceType"],

@@ -34,6 +34,9 @@ def comreqb(name=None):
 @app.route('/Bundle')
 def bundle(name=None):
     return render_template('bundle.html', name=name)
+@app.route('/Task')
+def task(name=None):
+    return render_template('task.html', name=name)
 
 @app.route('/receiveBundle', methods=['GET', 'POST'])
 def receiveBundle():
@@ -151,10 +154,31 @@ def member_match():
     print(param_data)
     r = requests.post(url, json = param_data, headers=headers, verify=False)
     json_data = json.loads(r.text)
-    if r.status_code != 200:
-        json_data = {"StatusCode" : r.status_code}
-    elif isinstance(json_data, int):
+    if isinstance(json_data, int):
         json_data = {"StatusCode": json_data}
+    if r.status_code != 200 or r.status_code != 201:
+        json_data["StatusCode"] = r.status_code
+    return jsonify(**json_data)
+@app.route('/send-task')
+def send_task():
+    identifier = request.args.get('id')
+    task_data = get_task(identifier)
+    url = request.args.get('url').replace("%2F", "/") if request.args.get('url') else base_url
+    url += '/Task'
+    r = requests.post(url, json = task_data, headers=headers, verify=False)
+    json_data = json.loads(r.text)
+    if isinstance(json_data, int):
+        json_data = {"StatusCode": json_data}
+    if r.status_code != 200:
+        json_data["StatusCode"] = r.status_code
+    return jsonify(**json_data)
+@app.route('/get-task')
+def get_task():
+    identifier = request.args.get('id')
+    url = request.args.get('url').replace("%2F", "/") if request.args.get('url') else base_url
+    url += ('/Task/' + str(identifier))
+    r = requests.get(url, headers=headers, verify=False)
+    json_data = json.loads(r.text)
     return jsonify(**json_data)
 @app.route('/sample-mm')
 def sample_mm():
@@ -310,10 +334,63 @@ def test_address():
       "country": "US"
     }
   ]
+def get_task(identifier):
+    return {
+      "resourceType" : "Task",
+      "id" : "requested",
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative with Details</b></p><p><b>id</b>: requested</p><p><b>status</b>: requested</p><p><b>intent</b>: order</p><p><b>code</b>: Coverage Transition Document <span style=\"background: LightGoldenRodYellow\">(Details : {http://hl7.org/fhir/us/davinci-pcde/CodeSystem/PCDEtempCodes code 'pcde' = 'Coverage Transition Document', given as 'Coverage Transition Document'})</span></p><p><b>for</b>: </p><p><b>requester</b>: New Insurance Co Inc.</p><p><b>owner</b>: Original Insurance Co Inc.</p></div>"
+      },
+      "status" : "requested",
+      "intent" : "order",
+      "code" : {
+        "coding" : [
+          {
+            "system" : "http://hl7.org/fhir/us/davinci-pcde/CodeSystem/PCDEtempCodes",
+            "code" : "pcde",
+            "display" : "Coverage Transition Document"
+          }
+        ]
+      },
+      "for" : {
+        "type" : "Patient",
+        "identifier" : {
+          "system" : "http://originalinsuranceinc.com/fhir/NamingSystem/client-ids",
+          "value" : identifier
+        }
+      },
+      "requester" : {
+        "type" : "Organization",
+        "display" : "New Insurance Co Inc."
+      },
+      "owner" : {
+        "type" : "Organization",
+        "display" : "Original Insurance Co Inc."
+      }
+    }
+
 def get_identifier(value):
     return {
               "system": "http://oldhealthplan.example.com",
               "value": value
+            }
+def get_full_identifier(value, code):
+    return {
+                "use": "usual",
+                "type": {
+                    "coding": [
+                        {
+                            "system": "http://hl7.org/fhir/v2/0203",
+                            "code": code,
+                            "display": "Medical record number",
+                            "userSelected": False
+                        }
+                    ],
+                    "text": "Medical record number"
+                },
+                "system": "http://hospital.smarthealthit.org",
+                "value": value
             }
 def get_member_match(given="", family="", birthDate="", sid="", mid=""):
     parameters = {
@@ -526,11 +603,12 @@ def get_member_match(given="", family="", birthDate="", sid="", mid=""):
     ]
   }
     if (not sid == "") or (not mid == ""):
-        parameters["parameter"][1]["identifier"] = []
+        parameters["parameter"][1]["resource"]["identifier"] = []
         if not sid == "":
-            parameters["parameter"][1]["identifier"].append(get_identifier(sid))
+            parameters["parameter"][1]["resource"]["identifier"].append(get_identifier(sid))
         if not mid == "":
-            parameters["parameter"][1]["identifier"].append(get_identifier(mid))
+            parameters["parameter"][1]["resource"]["identifier"].append(get_full_identifier(mid, "MB"))
+            parameters["parameter"][2]["resource"]["identifier"].append(get_full_identifier(mid, "MB"))
     return parameters
 
 
