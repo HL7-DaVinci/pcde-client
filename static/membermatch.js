@@ -52,14 +52,19 @@ function formatResource(data) {
           let patient = data["parameter"][1]["resource"]
           formatter += "<table style='width:100%'>";
           formatter += "<tr><td>Name: </td><td>"+patient["name"][0]["given"] + " "+ patient["name"][0]["family"]+"</td></tr>";
-          if (patient["birthData"] && patient["birthDate"] != "")
-              formatter += "<tr><td>Birth Date: </td><td>"+patient["birthDate"]+"</td></tr>";
-          if (patient["address"])
-              formatter += "<tr><td>Address: </td><td>"+patient["address"][0]["line"][0] + " "+ patient["address"][0]["city"]+ ", "+ patient["address"][0]["state"]+ ", "+ patient["address"][0]["postalCode"]+"</td></tr>";
-          if (patient["identifier"])
-              formatter += "<tr><td>UMB: </td><td>"+patient["identifier"][0]["value"]+"</td></tr>";
-          else
-            formatter += "<tr><td>UMB: </td><td>No Identifier was supplied</td></tr>";
+          if (patient["birthData"] && patient["birthDate"] != ""){
+              formatter += "<tr><td>Birth Date: </td><td>"+patient["birthDate"]+"</td></tr>";}
+          if (patient["address"]){
+              formatter += "<tr><td>Address: </td><td>"+patient["address"][0]["line"][0] + " "+ patient["address"][0]["city"]+ ", "+ patient["address"][0]["state"]+ ", "+ patient["address"][0]["postalCode"]+"</td></tr>";}
+          if (patient["identifier"]){
+              for (var i = 0; i < patient["identifier"].length; i++) {
+                if (patient["identifier"][i]["type"]["coding"][0]["code"] === "UMB") {
+                    formatter += "<tr><td>UMB: </td><td>"+patient["identifier"][i]["value"]+"</td></tr>";
+                }
+              }
+              }
+          else{
+            formatter += "<tr><td>UMB: </td><td>No Identifier was supplied</td></tr>";}
           formatter += "</table>";
           formatter += "<h3>Full Response</h3><span style=\"white-space: pre-wrap\">"+syntaxHighlight((JSON.stringify(data, undefined, 4)))+"</span>";
       } else if (data["StatusCode"]) {
