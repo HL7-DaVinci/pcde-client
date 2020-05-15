@@ -40,10 +40,7 @@ function formatSample(data) {
 function formatResource(data) {
     try {
       let formatter = "<h3>An error occured</h3>";
-      if (data["StatusCode"]) {
-          formatter = "<h3>An error occured received " + data["StatusCode"] + "</h3>";
-          formatter += formatSample(data);
-      } else if (data["resourceType"] == "OperationOutcome") {
+      if (data["resourceType"] == "OperationOutcome") {
           formatter = {
               "resourceType": data["resourceType"],
               "issue": data["issue"],
@@ -65,6 +62,9 @@ function formatResource(data) {
             formatter += "<tr><td>UMB: </td><td>No Identifier was supplied</td></tr>";
           formatter += "</table>";
           formatter += "<h3>Full Response</h3><span style=\"white-space: pre-wrap\">"+syntaxHighlight((JSON.stringify(data, undefined, 4)))+"</span>";
+      } else if (data["StatusCode"]) {
+          formatter = "<h3>An error occured received " + data["StatusCode"] + "</h3>";
+          formatter += formatSample(data);
       }
       return formatter;
     } catch (err) {
