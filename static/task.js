@@ -34,11 +34,11 @@ function formatResource(data) {
       let formatter = "<h3>An error occured</h3>";
       if (data["resourceType"] == "Task") {
           formatter = "<h3>Resource: " + data["resourceType"] + "</h3>"
-          formatter += "<h3>Status: " + data["status"] + "</h3>"
-          formatter += "<h3>Id: " + data["id"] + "</h3>"
-          formatter += "<h3>Patient: " + data["for"]["identifier"]["value"] + "</h3>"
+          formatter += "<h3>Current Task Status: " + data["status"] + "</h3>"
+          formatter += "<h3>Task Id: " + data["id"] + "</h3>"
+          formatter += "<h3>Patient Id: " + data["for"]["identifier"]["value"] + "</h3>"
           if (data["status"] === "completed"){
-              formatter += "<h3>Bundle Id: " + data["output"][0]["valueReference"]["reference"] + "</h3>"
+              formatter += "<h3>Bundle Location: " + data["output"][0]["valueReference"]["reference"] + "</h3>"
           }
           formatter += formatSample(data)
       } else if (data["StatusCode"]) {

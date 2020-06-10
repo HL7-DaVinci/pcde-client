@@ -61,8 +61,36 @@ html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif;}
     </div>
 
   </div>
-  <div id="display" class="indent overflow"></div>
+  <div id="collapseContainer" style="display: none" class="indent overflow">
+      <button type="button" class="collapsible">Patient</button>
+      <div class="content">
+        <p id="patientContent">Patient Stuff</p>
+      </div>
+      <button type="button" class="collapsible">Active Treatment</button>
+      <div class="content">
+        <button type="button" class="collapsible">Medications</button>
+        <div class="content">
+          <p id="medicineContent">medicine</p>
+        </div>
+        <button type="button" class="collapsible">Durable Medical Equipment</button>
+        <div class="content">
+          <p id="equipmentContent">equipment</p>
+        </div>
+        <button type="button" class="collapsible">Other</button>
+        <div class="content">
+          <p id="other">other</p>
+        </div>
+      </div>
+      <button type="button" class="collapsible">Full Bundle</button>
+      <div class="content">
+        <p id="bundle">Full Bundle</p>
+      </div>
+  </div>
+  <div id="display" class="indent">
+
+  </div>
   <pre id="json"></pre>
+
 
   <br>
   <br>

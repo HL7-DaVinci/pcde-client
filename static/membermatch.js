@@ -11,7 +11,7 @@ $(function() {
         function(data) {
           console.log(data)
           formatter = formatResource(data);
-          formatter = "<div class='card'>" + formatter + "</div>";
+          formatter = "<div class='card'><h3>Full Response</h3>" + formatter + "</div>";
           $("#display").html(formatter);
     });
     return false;
@@ -28,14 +28,14 @@ $(function() {
         function(data) {
           console.log(data)
           formatter = formatSample(data);
-          formatter = "<div class='card'>" + formatter + "</div>";
+          formatter = "<div class='card'><h3>Sample Message</h3>" + formatter + "</div>";
           $("#display").html(formatter);
     });
     return false;
   });
 });
 function formatSample(data) {
-  return "<h3>Full Response</h3><span style=\"white-space: pre-wrap\">"+syntaxHighlight((JSON.stringify(data, undefined, 4)))+"</span>";
+  return "<span style=\"white-space: pre-wrap\">"+syntaxHighlight((JSON.stringify(data, undefined, 4)))+"</span>";
 }
 function formatResource(data) {
     try {

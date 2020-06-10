@@ -20,6 +20,9 @@ def index(name=None):
 @app.route('/Patient')
 def patient(name=None):
     return render_template('patient.html', name=name)
+@app.route('/test')
+def dummy(name=None):
+    return render_template('dummy.html', name=name)
 @app.route('/memberMatch')
 def memberMatch(name=None):
     return render_template('memberMatch.html', name=name)
@@ -164,6 +167,8 @@ def send_task():
     identifier = request.args.get('id')
     task_data = get_task(identifier)
     url = request.args.get('url').replace("%2F", "/") if request.args.get('url') else base_url
+    if (url == base_url):
+        url += '/PCDE'
     url += '/Task'
     r = requests.post(url, json = task_data, headers=headers, verify=False)
     json_data = json.loads(r.text)
