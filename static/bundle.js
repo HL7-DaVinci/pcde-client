@@ -37,6 +37,7 @@ $(function() {
           let medDisplay = "";
           let deviceDisplay = "";
           let other = "";
+          let supportingInfo = "";
           if (data["resourceType"] === "Bundle") {
               document.getElementById("collapseContainer").style.display = "block";
               div = "<div><h2>"+data["entry"][0]["resource"]["title"]+"</h2>";
@@ -109,12 +110,27 @@ $(function() {
                       }
                   }
 
+                } else if (data["entry"][i]["resource"]["resourceType"] == "DocumentReference") {
+                    let docRef = data["entry"][i]["resource"];
+                    supportingInfo += "<h3>"+docRef["resourceType"]+"</h3><table style='width:100%'>";
+                    supportingInfo += "<tr><td>System: " + docRef["type"]["coding"][0]["system"] + "</td></tr>";
+                    supportingInfo += "<tr><td>Code: " + docRef["type"]["coding"][0]["code"] + "</td></tr>";
+                    if (docRef["content"][0]["attachment"]["contentType"] === "text/plain") {
+                        // Parse the base64 plan text
+                        supportingInfo += "<tr><td>Text: " + atob(docRef["content"][0]["attachment"]["data"]) + "</td></tr>";
+                    } else if (docRef["content"][0]["attachment"]["contentType"] === "application/pdf") {
+                        // Parse the base64 PDF
+                        supportingInfo += "<tr><td>PDF Attachment</td></tr>";
+                    }
+                    supportingInfo += "</table>";
                 }
               }
               div += "</div>";
               $("#medicineContent").html(medDisplay);
               $("#equipmentContent").html(deviceDisplay);
               $("#other").html(other);
+              console.log(supportingInfo)
+              $("#supInf").html(supportingInfo);
               $("#bundle").html(div);
           }
     });
