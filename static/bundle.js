@@ -71,6 +71,8 @@ $(function() {
                           if (careplan["activity"][j]["detail"]["description"])
                               medDisplay += "<tr><td>" + careplan["activity"][j]["detail"]["description"] + "</td></tr>";
                           for (let k = 0; k < careplan["activity"][j]["detail"]["productCodeableConcept"]["coding"].length; k++) {
+                            medDisplay += "<tr><td> </td></tr>";
+                            medDisplay += "<tr><td>System: " + careplan["activity"][j]["detail"]["productCodeableConcept"]["coding"][k]["system"] + "</td></tr>";
                             medDisplay += "<tr><td>Code: " + careplan["activity"][j]["detail"]["productCodeableConcept"]["coding"][k]["code"] + "</td></tr>";
                             medDisplay += "<tr><td>Description: " + careplan["activity"][j]["detail"]["productCodeableConcept"]["coding"][k]["display"] + "</td></tr>";
                           }
@@ -82,11 +84,13 @@ $(function() {
                           if (careplan["activity"][j]["detail"]["description"])
                               deviceDisplay += "<tr><td>" + careplan["activity"][j]["detail"]["description"] + "</td></tr>";
                           for (let k = 0; k < careplan["activity"][j]["detail"]["productCodeableConcept"]["coding"].length; k++) {
+                            deviceDisplay += "<tr><td> </td></tr>";
+                            deviceDisplay += "<tr><td>System: " + careplan["activity"][j]["detail"]["productCodeableConcept"]["coding"][k]["system"] + "</td></tr>";
                             deviceDisplay += "<tr><td>Code: " + careplan["activity"][j]["detail"]["productCodeableConcept"]["coding"][k]["code"] + "</td></tr>";
                             deviceDisplay += "<tr><td>Description: " + careplan["activity"][j]["detail"]["productCodeableConcept"]["coding"][k]["display"] + "</td></tr>";
                           }
                           deviceDisplay += "</table>";
-                      } else {
+                      } else if (careplan["activity"][j]["detail"]["kind"] === "ServiceRequest") {
                           if (careplan["activity"][j]["detail"]["kind"]) {
                               other += "<h3>"+careplan["activity"][j]["detail"]["kind"]+"</h3><table style='width:100%'>";
                               if (careplan["activity"][j]["detail"]["productCodeableConcept"]) {
@@ -94,6 +98,8 @@ $(function() {
                                   if (careplan["activity"][j]["detail"]["description"])
                                       other += "<tr><td>" + careplan["activity"][j]["detail"]["description"] + "</td></tr>";
                                   for (let k = 0; k < careplan["activity"][j]["detail"]["productCodeableConcept"]["coding"].length; k++) {
+                                    other += "<tr><td> </td></tr>";
+                                    other += "<tr><td>System: " + careplan["activity"][j]["detail"]["productCodeableConcept"]["coding"][k]["system"] + "</td></tr>";
                                     other += "<tr><td>Code: " + careplan["activity"][j]["detail"]["productCodeableConcept"]["coding"][k]["code"] + "</td></tr>";
                                     other += "<tr><td>Description: " + careplan["activity"][j]["detail"]["productCodeableConcept"]["coding"][k]["display"] + "</td></tr>";
                                   }
