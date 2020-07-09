@@ -126,7 +126,7 @@ $(function() {
                     } else if (docRef["content"][0]["attachment"]["contentType"] === "application/pdf") {
                         // Parse the base64 PDF
                         supportingInfo += "<tr><td>PDF Attachment</td></tr>";
-                        convertToPDF(docRef["content"][0]["attachment"]["data"]);
+                        supportingInfo += "<a download='file.pdf' href='"+convertToPDF(docRef["content"][0]["attachment"]["data"])+"'>Download PDF</a>";
                     }
                     supportingInfo += "</table>";
                 }
@@ -143,31 +143,22 @@ $(function() {
   });
 });
 function convertToPDF(b64) {
-      // The Base64 string of a simple PDF file
-      // Decode Base64 to binary and show some information about the PDF file (note that I skipped all checks)
-      let bin = atob(b64);
-      console.log('File Size:', Math.round(bin.length / 1024), 'KB');
-      console.log('PDF Version:', bin.match(/^.PDF-([0-9.]+)/)[1]);
-      console.log('Create Date:', bin.match(/<xmp:CreateDate>(.+?)<\/xmp:CreateDate>/)[1]);
-      console.log('Modify Date:', bin.match(/<xmp:ModifyDate>(.+?)<\/xmp:ModifyDate>/)[1]);
-      console.log('Creator Tool:', bin.match(/<xmp:CreatorTool>(.+?)<\/xmp:CreatorTool>/)[1]);
-
       // Embed the PDF into the HTML page and show it to the user
-      let obj = document.createElement('object');
-      obj.style.width = '100%';
-      obj.style.height = '842pt';
-      obj.type = 'application/pdf';
-      obj.data = 'data:application/pdf;base64,' + b64;
+      // let obj = document.createElement('object');
+      // obj.style.width = '100%';
+      // obj.style.height = '842pt';
+      // obj.type = 'application/pdf';
+      // obj.data = 'data:application/pdf;base64,' + b64;
+      // let pdfDiv = "<div><object style='width: 100%; height: 842px;' type='application/pdf' data='data:application/pdf;base64+" + b64 + "'></object></div>";
       // document.body.appendChild(obj);
-      $("#pdfDiv").append(obj);
+      // $("#pdfDiv").append(obj);
 
       // Insert a link that allows the user to download the PDF file
       let link = document.createElement('a');
       link.innerHTML = 'Download PDF file';
       link.download = 'file.pdf';
       link.href = 'data:application/octet-stream;base64,' + b64;
-      $("#pdfDiv").append(link);
-      // document.body.appendChild(link);
+      return link;
 }
 function formatResource(data) {
     let formatter = null;
