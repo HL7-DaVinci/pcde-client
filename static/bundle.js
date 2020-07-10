@@ -35,6 +35,8 @@ $(function() {
           $("#json").html("<h3>Full Bundle</h3>"+syntaxHighlight(JSON.stringify(formatter, undefined, 2)));
           let div = "";
           let medDisplay = "";
+          let medRGroups = [];
+          let medDGroups = [];
           let deviceDisplay = "";
           let other = "";
           let supportingInfo = "";
@@ -44,7 +46,7 @@ $(function() {
               for (let i = 0; i < data["entry"].length; i++) {
                 if (data["entry"][i]["resource"]["resourceType"] == "Patient") {
                   let patient = data["entry"][i]["resource"]
-                  let pDisplay ="<table style='width:100%'>";
+                  let pDisplay ="<div class='card'><table style='width:100%'>";
                   pDisplay += "<tr><td>Name: </td><td>"+patient["name"][0]["given"][0] + " "+ patient["name"][0]["family"]+"</td></tr>";
                   if (patient["birthDate"])
                       pDisplay += "<tr><td>Birth Date: </td><td>"+patient["birthDate"]+"</td></tr>";
@@ -54,7 +56,7 @@ $(function() {
                       pDisplay += "<tr><td>"+patient["identifier"][j]["type"]["coding"][0]["display"]+": </td><td>"+patient["identifier"][j]["value"]+"</td></tr>";
                   }
                   pDisplay += "<tr><td>FHIR ID: </td><td>"+patient["id"]+"</td></tr>";
-                  pDisplay += "</table>"
+                  pDisplay += "</table></div>"
                   $("#patientContent").html(pDisplay);
                   div += "<h3>Patient</h3>"+data["entry"][i]["resource"]["text"]["div"];
                 }
@@ -72,20 +74,9 @@ $(function() {
                   }
                   for (let j = 0; j < careplan["activity"].length; j++) {
                       if (careplan["activity"][j]["detail"]["kind"] === "MedicationRequest") {
-                          medDisplay += "<h3>"+careplan["activity"][j]["detail"]["kind"]+"</h3><table style='width:100%'>";
-                          medDisplay += "<tr><td>" + careplan["activity"][j]["detail"]["productCodeableConcept"]["text"] + "</td></tr>";
-                          if (careplan["activity"][j]["detail"]["description"])
-                              medDisplay += "<tr><td>" + careplan["activity"][j]["detail"]["description"] + "</td></tr>";
-                          for (let k = 0; k < careplan["activity"][j]["detail"]["productCodeableConcept"]["coding"].length; k++) {
-                            medDisplay += "<tr><td> </td></tr>";
-                            medDisplay += "<tr><td>System: " + careplan["activity"][j]["detail"]["productCodeableConcept"]["coding"][k]["system"] + "</td></tr>";
-                            medDisplay += "<tr><td>Code: " + careplan["activity"][j]["detail"]["productCodeableConcept"]["coding"][k]["code"] + "</td></tr>";
-                            medDisplay += "<tr><td>Description: " + careplan["activity"][j]["detail"]["productCodeableConcept"]["coding"][k]["display"] + "</td></tr>";
-                          }
-                          medDisplay += "</table>";
-
+                          medRGroups.push(careplan["activity"][j])
                       } else if (careplan["activity"][j]["detail"]["kind"] === "DeviceRequest") {
-                          deviceDisplay += "<h3>"+careplan["activity"][j]["detail"]["kind"]+"</h3><table style='width:100%'>";
+                          deviceDisplay += "<div class='card'><h3>"+careplan["activity"][j]["detail"]["kind"]+"</h3><table style='width:100%'>";
                           deviceDisplay += "<tr><td>" + careplan["activity"][j]["detail"]["productCodeableConcept"]["text"] + "</td></tr>";
                           if (careplan["activity"][j]["detail"]["description"])
                               deviceDisplay += "<tr><td>" + careplan["activity"][j]["detail"]["description"] + "</td></tr>";
@@ -95,10 +86,10 @@ $(function() {
                             deviceDisplay += "<tr><td>Code: " + careplan["activity"][j]["detail"]["productCodeableConcept"]["coding"][k]["code"] + "</td></tr>";
                             deviceDisplay += "<tr><td>Description: " + careplan["activity"][j]["detail"]["productCodeableConcept"]["coding"][k]["display"] + "</td></tr>";
                           }
-                          deviceDisplay += "</table>";
+                          deviceDisplay += "</table></div>";
                       } else if (careplan["activity"][j]["detail"]["kind"] === "ServiceRequest") {
                           if (careplan["activity"][j]["detail"]["kind"]) {
-                              other += "<h3>"+careplan["activity"][j]["detail"]["kind"]+"</h3><table style='width:100%'>";
+                              other += "<div class='card'><h3>"+careplan["activity"][j]["detail"]["kind"]+"</h3><table style='width:100%'>";
                               if (careplan["activity"][j]["detail"]["productCodeableConcept"]) {
                                   other += "<tr><td>" + careplan["activity"][j]["detail"]["productCodeableConcept"]["text"] + "</td></tr>";
                                   if (careplan["activity"][j]["detail"]["description"])
@@ -110,14 +101,14 @@ $(function() {
                                     other += "<tr><td>Description: " + careplan["activity"][j]["detail"]["productCodeableConcept"]["coding"][k]["display"] + "</td></tr>";
                                   }
                               }
-                              other += "</table>";
+                              other += "</table></div>";
                           } else { console.log(careplan["activity"][j])}
                       }
                   }
 
                 } else if (data["entry"][i]["resource"]["resourceType"] == "DocumentReference") {
                     let docRef = data["entry"][i]["resource"];
-                    supportingInfo += "<h3>"+docRef["resourceType"]+"</h3><table style='width:100%'>";
+                    supportingInfo += "<div class='card'><h3>"+docRef["resourceType"]+"</h3><table style='width:100%'>";
                     supportingInfo += "<tr><td>System: " + docRef["type"]["coding"][0]["system"] + "</td></tr>";
                     supportingInfo += "<tr><td>Code: " + docRef["type"]["coding"][0]["code"] + "</td></tr>";
                     if (docRef["content"][0]["attachment"]["contentType"] === "text/plain") {
@@ -128,10 +119,28 @@ $(function() {
                         supportingInfo += "<tr><td>PDF Attachment</td></tr>";
                         supportingInfo += "<a download='file.pdf' href='"+convertToPDF(docRef["content"][0]["attachment"]["data"])+"'>Download PDF</a>";
                     }
-                    supportingInfo += "</table>";
+                    supportingInfo += "</table></div>";
+                } else if (data["entry"][i]["resource"]["resourceType"] == "MedicationDispense") {
+                    medDGroups.push(data["entry"][i]["resource"]);
+                    console.log(data["entry"][i]["resource"]);
                 }
               }
               div += "</div>";
+              for (let mr of medRGroups) {
+                  medDisplay += "<div class='card'>";
+                  medDisplay += medicationRequestHTML(mr);
+                  for (let md of medDGroups) {
+                      for (let i = 0; i < mr["detail"]["productCodeableConcept"]["coding"].length; i++) {
+                          for (let j = 0; j < mr["detail"]["productCodeableConcept"]["coding"].length; j++) {
+                              if (mr["detail"]["productCodeableConcept"]["coding"][i]["code"] === md["medicationCodeableConcept"]["coding"][j]["code"]) {
+                                  medDisplay += MedicationDispenseHTML(md);
+                              }
+                          }
+                      }
+
+                  }
+                  medDisplay += "</div>";
+              }
               $("#medicineContent").html(medDisplay);
               $("#equipmentContent").html(deviceDisplay);
               $("#other").html(other);
@@ -142,6 +151,34 @@ $(function() {
     return false;
   });
 });
+// mr will be careplan["activity"][index]
+function medicationRequestHTML(mr) {
+    let medDisplay = "<h3>"+mr["detail"]["kind"]+"</h3><table style='width:100%'>";
+    medDisplay += "<tr><td>" + mr["detail"]["productCodeableConcept"]["text"] + "</td></tr>";
+    if (mr["detail"]["description"])
+        medDisplay += "<tr><td>" + mr["detail"]["description"] + "</td></tr>";
+    for (let k = 0; k < mr["detail"]["productCodeableConcept"]["coding"].length; k++) {
+      medDisplay += "<tr><td> </td></tr>";
+      medDisplay += "<tr><td>System: " + mr["detail"]["productCodeableConcept"]["coding"][k]["system"] + "</td></tr>";
+      medDisplay += "<tr><td>Code: " + mr["detail"]["productCodeableConcept"]["coding"][k]["code"] + "</td></tr>";
+      medDisplay += "<tr><td>Description: " + mr["detail"]["productCodeableConcept"]["coding"][k]["display"] + "</td></tr>";
+    }
+    medDisplay += "</table>";
+    return medDisplay;
+}
+function MedicationDispenseHTML(md) {
+      let medDisplay = "<h3>"+md["resourceType"]+"</h3><table style='width:100%'>";
+      medDisplay += "<tr><td>" + md["medicationCodeableConcept"]["text"] + "</td></tr>";
+      medDisplay += "<tr><td>Status: " + md["status"] + "</td></tr>";
+      for (let k = 0; k < md["medicationCodeableConcept"]["coding"].length; k++) {
+        medDisplay += "<tr><td> </td></tr>";
+        medDisplay += "<tr><td>System: " + md["medicationCodeableConcept"]["coding"][k]["system"] + "</td></tr>";
+        medDisplay += "<tr><td>Code: " + md["medicationCodeableConcept"]["coding"][k]["code"] + "</td></tr>";
+        medDisplay += "<tr><td>Description: " + md["medicationCodeableConcept"]["coding"][k]["display"] + "</td></tr>";
+      }
+      medDisplay += "</table>";
+      return medDisplay;
+}
 function convertToPDF(b64) {
       // Embed the PDF into the HTML page and show it to the user
       // let obj = document.createElement('object');
