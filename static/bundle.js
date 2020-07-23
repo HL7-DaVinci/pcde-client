@@ -37,6 +37,7 @@ $(function() {
           let medDisplay = "";
           let medRGroups = [];
           let medDGroups = [];
+          let medCGroups = {};
           let deviceDisplay = "";
           let other = "";
           let supportingInfo = "";
@@ -72,8 +73,20 @@ $(function() {
                   } else {
                       console.log(data["entry"][i])
                   }
+                  let claimRef = "";
                   for (let j = 0; j < careplan["activity"].length; j++) {
-                      if (careplan["activity"][j]["detail"]["kind"] === "MedicationRequest") {
+                      if (careplan["activity"][j]["outcomeReference"]) {
+                          if (careplan["activity"][j]["outcomeReference"][0]["reference"].includes("Claim")) {
+                              claimRef = careplan["activity"][j]["outcomeReference"][0]["reference"];
+                              console.log("Setting Claim Ref " + claimRef);
+                          }
+                      } else if (careplan["activity"][j]["detail"]["kind"] === "MedicationRequest") {
+                          console.log("Current claimRef: " + claimRef);
+                          if (claimRef !== "") {
+                              console.log("Adding to careplan " + claimRef);
+                              careplan["activity"][j]["claimRef"] = claimRef;
+                              claimRef = "";
+                          }
                           medRGroups.push(careplan["activity"][j])
                       } else if (careplan["activity"][j]["detail"]["kind"] === "DeviceRequest") {
                           deviceDisplay += "<div class='card'><h3>"+careplan["activity"][j]["detail"]["kind"]+"</h3><table style='width:100%'>";
@@ -123,23 +136,40 @@ $(function() {
                 } else if (data["entry"][i]["resource"]["resourceType"] == "MedicationDispense") {
                     medDGroups.push(data["entry"][i]["resource"]);
                     console.log(data["entry"][i]["resource"]);
+                } else if (data["entry"][i]["resource"]["resourceType"] == "Claim") {
+                    // This will contain all claims
+                    medCGroups["Claim/" + data["entry"][i]["resource"]["id"]] = data["entry"][i]["resource"];
                 }
               }
               div += "</div>";
+              let usedList = [];
               for (let mr of medRGroups) {
                   medDisplay += "<div class='card'>";
                   medDisplay += medicationRequestHTML(mr);
+                  if (mr["claimRef"]) {
+                      console.log("Adding Claim Ref to medDisplay");
+                      medDisplay += medicationClaimHTML(medCGroups[mr["claimRef"]]);
+                  }
+                  let x = 0;
                   for (let md of medDGroups) {
                       for (let i = 0; i < mr["detail"]["productCodeableConcept"]["coding"].length; i++) {
                           for (let j = 0; j < mr["detail"]["productCodeableConcept"]["coding"].length; j++) {
                               if (mr["detail"]["productCodeableConcept"]["coding"][i]["code"] === md["medicationCodeableConcept"]["coding"][j]["code"]) {
-                                  medDisplay += MedicationDispenseHTML(md);
+                                  medDisplay += medicationDispenseHTML(md);
+                                  usedList.push(x)
                               }
                           }
                       }
-
+                      x++;
                   }
                   medDisplay += "</div>";
+              }
+              for (let i = 0; i < medDGroups.length; i++) {
+                  if (!(i in usedList)) {
+                      medDisplay += "<div class='card'>";
+                      medDisplay += medicationDispenseHTML(medDGroups[i]);
+                      medDisplay += "</div>";
+                  }
               }
               $("#medicineContent").html(medDisplay);
               $("#equipmentContent").html(deviceDisplay);
@@ -166,7 +196,7 @@ function medicationRequestHTML(mr) {
     medDisplay += "</table>";
     return medDisplay;
 }
-function MedicationDispenseHTML(md) {
+function medicationDispenseHTML(md) {
       let medDisplay = "<h3>"+md["resourceType"]+"</h3><table style='width:100%'>";
       medDisplay += "<tr><td>" + md["medicationCodeableConcept"]["text"] + "</td></tr>";
       medDisplay += "<tr><td>Status: " + md["status"] + "</td></tr>";
@@ -178,6 +208,18 @@ function MedicationDispenseHTML(md) {
       }
       medDisplay += "</table>";
       return medDisplay;
+}
+function medicationClaimHTML(claim) {
+    let medDisplay = "<h3>"+claim["resourceType"]+"</h3><table style='width:100%'>";
+    let product = claim["item"][0]["productOrService"]
+    for (let k = 0; k < product["coding"].length; k++) {
+      medDisplay += "<tr><td> </td></tr>";
+      medDisplay += "<tr><td>System: " + product["coding"][k]["system"] + "</td></tr>";
+      medDisplay += "<tr><td>Code: " + product["coding"][k]["code"] + "</td></tr>";
+      medDisplay += "<tr><td>Description: " + product["coding"][k]["display"] + "</td></tr>";
+    }
+    medDisplay += "</table>";
+    return medDisplay;
 }
 function convertToPDF(b64) {
       // Embed the PDF into the HTML page and show it to the user
