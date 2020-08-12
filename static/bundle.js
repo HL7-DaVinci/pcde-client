@@ -38,6 +38,7 @@ $(function() {
           let medRGroups = [];
           let medDGroups = [];
           let medCGroups = {};
+          let medEOBGroups = {};
           let deviceDisplay = "";
           let other = "";
           let supportingInfo = "";
@@ -45,7 +46,11 @@ $(function() {
               document.getElementById("collapseContainer").style.display = "block";
               div = "<div><h2>"+data["entry"][0]["resource"]["title"]+"</h2>";
               for (let i = 0; i < data["entry"].length; i++) {
-                if (data["entry"][i]["resource"]["resourceType"] == "Patient") {
+                if (!data["entry"][i]["resource"]) {
+                  console.log("TEST")
+                  console.log(data["entry"][i])
+                }
+                else if (data["entry"][i]["resource"]["resourceType"] == "Patient") {
                   let patient = data["entry"][i]["resource"]
                   let pDisplay ="<div class='card'><table style='width:100%'>";
                   pDisplay += "<tr><td>Name: </td><td>"+patient["name"][0]["given"][0] + " "+ patient["name"][0]["family"]+"</td></tr>";
@@ -74,11 +79,16 @@ $(function() {
                       console.log(data["entry"][i])
                   }
                   let claimRef = "";
+                  let eobRef = "";
                   for (let j = 0; j < careplan["activity"].length; j++) {
                       if (careplan["activity"][j]["outcomeReference"]) {
                           if (careplan["activity"][j]["outcomeReference"][0]["reference"].includes("Claim")) {
                               claimRef = careplan["activity"][j]["outcomeReference"][0]["reference"];
                               console.log("Setting Claim Ref " + claimRef);
+                          } else if (careplan["activity"][j]["outcomeReference"][0]["reference"].includes("ExplanationOfBenefit")) {
+
+                              eobRef = careplan["activity"][j]["outcomeReference"][0]["reference"];
+                              console.log("ADDING EOBREF" + eobRef)
                           }
                       } else if (careplan["activity"][j]["detail"]["kind"] === "MedicationRequest") {
                           console.log("Current claimRef: " + claimRef);
@@ -86,6 +96,10 @@ $(function() {
                               console.log("Adding to careplan " + claimRef);
                               careplan["activity"][j]["claimRef"] = claimRef;
                               claimRef = "";
+                          } else if (eobRef !== "") {
+                              console.log("Adding to careplan " + eobRef);
+                              careplan["activity"][j]["eobRef"] = eobRef;
+                              eobRef = "";
                           }
                           medRGroups.push(careplan["activity"][j])
                       } else if (careplan["activity"][j]["detail"]["kind"] === "DeviceRequest") {
@@ -139,6 +153,11 @@ $(function() {
                 } else if (data["entry"][i]["resource"]["resourceType"] == "Claim") {
                     // This will contain all claims
                     medCGroups["Claim/" + data["entry"][i]["resource"]["id"]] = data["entry"][i]["resource"];
+                } else if (data["entry"][i]["resource"]["resourceType"] == "ExplanationOfBenefit") {
+                    // This will contain all claims
+                    console.log("FOUND EOB");
+                    console.log(data["entry"][i]["resource"])
+                    medEOBGroups["ExplanationOfBenefit/" + data["entry"][i]["resource"]["id"]] = data["entry"][i]["resource"];
                 }
               }
               div += "</div>";
@@ -149,6 +168,10 @@ $(function() {
                   if (mr["claimRef"]) {
                       console.log("Adding Claim Ref to medDisplay");
                       medDisplay += medicationClaimHTML(medCGroups[mr["claimRef"]]);
+                  }
+                  if (mr["eobRef"]) {
+                      console.log("Adding EOB Ref to medDisplay");
+                      medDisplay += medicationClaimHTML(medEOBGroups[mr["eobRef"]]);
                   }
                   let x = 0;
                   for (let md of medDGroups) {
