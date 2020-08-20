@@ -145,6 +145,10 @@ $(function() {
                         // Parse the base64 PDF
                         supportingInfo += "<tr><td>PDF Attachment</td></tr>";
                         supportingInfo += "<a download='file.pdf' href='"+convertToPDF(docRef["content"][0]["attachment"]["data"])+"'>Download PDF</a>";
+                    } else if (docRef["content"][0]["attachment"]["contentType"] === "application/edi-x12") {
+                        console.log("edi-x12")
+                        supportingInfo += "<tr><td>Text: " + docRef["content"][0]["attachment"]["contentType"] + "</td></tr>";
+                        supportingInfo += "<a download='file.txt' href='"+convertToTxt(docRef["content"][0]["attachment"]["data"])+"'>Download Text</a>";
                     }
                     supportingInfo += "</table></div>";
                 } else if (data["entry"][i]["resource"]["resourceType"] == "MedicationDispense") {
@@ -261,6 +265,13 @@ function convertToPDF(b64) {
       link.download = 'file.pdf';
       link.href = 'data:application/octet-stream;base64,' + b64;
       return link;
+}
+function convertToTxt(b64) {
+  let link = document.createElement('a');
+  link.innerHTML = 'Download txt file';
+  link.download = 'file.txt';
+  link.href = 'data:application/octet-stream;base64,' + b64;
+  return link;
 }
 function formatResource(data) {
     let formatter = null;
