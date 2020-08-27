@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<title>PCDE Client</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/static/main.css">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-black.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif;}
+.w3-sidebar {
+  z-index: 3;
+  width: 250px;
+  top: 43px;
+  bottom: 0;
+  height: inherit;
+}
+</style>
+<script>
+    $(function(){
+      $("#includedContent").load("/static/header.html");
+    });
+</script>
+<body>
+
+<div id="includedContent"></div>
+
+<!-- Main content: shift it to the right by 250 pixels when the sidebar is visible -->
+<div class="w3-main" style="margin-left:250px">
+
+  <div class="w3-row w3-padding-64">
+    <div class="w3-twothird w3-container">
+      <h1 class="w3-text-teal">PCDE Client</h1>
+      <p>This server provides a client for interacting with the <a href="https://davinci-pcde-ri.logicahealth.org/">Da Vinci Payer Coverage Decision Exchange Reference Implementation.</a></p>
+      <p>The default endpoint is the reference server: <a href="https://davinci-pcde-ri.logicahealth.org/fhir">https://davinci-pcde-ri.logicahealth.org/fhir</a></p>
+      <p>This endpoint can be updated to make calls to different server as the new payer</p>
+      <p>To begin using the client click on one of links on the side menu. These will allow you to send and retrieve information from the reference implementation server.</p>
+    </div>
+
+  </div>
+
+  <div class="w3-row">
+    <div class="w3-twothird w3-container">
+      <h1 class="w3-text-teal">PCDE Order</h1>
+        <p>The first part of the operation is <a href="https://davinci-pcde-client.logicahealth.org/memberMatch">Member Match</a>. The patient UMB must be aquired
+        to move on to the next step.</p>
+        <p>The second part of the operation is <a href="https://davinci-pcde-client.logicahealth.org/Task">Task</a>. The patient UMB is used to send the task.
+        The task can be queried with the task id that was returned. Once the task status is complete, the bundle id should be found.</p>
+        <p>The second part of the operation is <a href="https://davinci-pcde-client.logicahealth.org/Bundle">Bundle</a>. The Bundle can be retrieved with the id from the
+        task outcome.</p>
+    </div>
+
+  </div>
+
+  <div class="w3-row">
+    <div class="w3-twothird w3-container">
+      <h1 class="w3-text-teal">PCDE Member Match</h1>
+      <p>On the <a href="https://davinci-pcde-client.logicahealth.org/memberMatch">Member Match</a> page there are two different buttons.
+      The "Select Member" button sends a request to the provideded server with a generated patient and coverage doc based on the information provided.
+      The "Sample Message" button shows what the parameters look like in FHIR form.</p>
+      <p>Below are the sample patients to begin testing member match with the Reference Implementation Server.</p>
+      <div class="card2">
+        <h3>Patient 1</h3>
+        <table>
+        <tr><td>Given Name:</td><td>Joe</td></tr>
+        <tr><td>Last Name:</td><td>Smith</td></tr>
+        <tr><td>Birthdate:</td><td>1954-07-25</td></tr>
+        <tr><td>Old Member Id:</td><td>12345678901</td></tr>
+        </table>
+      </div>
+      <div class="card2">
+        <h3>Patient 2</h3>
+        <table>
+        <tr><td>Given Name:</td><td>Jeff</td></tr>
+        <tr><td>Last Name:</td><td>Smith</td></tr>
+        <tr><td>Birthdate:</td><td>1980-01-13</td></tr>
+        </table>
+      </div>
+      <div class="card2">
+        <h3>Patient 3</h3>
+        <table>
+        <tr><td>Given Name:</td><td>Jeff</td></tr>
+        <tr><td>Last Name:</td><td>Smith</td></tr>
+        <tr><td>Birthdate:</td><td>1980-01-12</td></tr>
+        </table>
+      </div>
+      <p>The reference server will return a patient as long as it can find a unique match. Otherwise
+      an error message will be returned.</p>
+
+    </div>
+  </div>
+  <div class="w3-row">
+    <div class="w3-twothird w3-container">
+      <h1 class="w3-text-teal">PCDE Task</h1>
+      <p>To send a <a href="https://davinci-pcde-client.logicahealth.org/Task">Task</a> all that is required is the patient UMB which is returned from the member match operation.
+      When the task is created, the resource should be returned with the Task id. This id should be used to make queries about the task status.
+      When the task status is "complete" the Bundle id should be found in the outcome.</p>
+      <p></p>
+    </div>
+  </div>
+  <div class="w3-row" style="padding-bottom: 64px">
+    <div class="w3-twothird w3-container">
+      <h1 class="w3-text-teal">PCDE Bundle</h1>
+      <p>The <a href="https://davinci-pcde-client.logicahealth.org/Bundle">PCDE Bundle</a> can be queried as long as the id is known.
+      The client breaks up the bundle and sorts related care plans to make it easier to navigate. Supporting information contains downloadable
+      documents that were attached to the bundle. Below the parsed bundle, the full FHIR resource can be viewed.</p>
+      <p></p>
+    </div>
+  </div>
+  <footer id="myFooter" class="footer">
+    <div class="w3-container w3-theme-l2 w3-padding-32">
+      <h4></h4>
+    </div>
+
+  </footer>
+
+<!-- END MAIN -->
+</div>
+
+<script>
+// Get the Sidebar
+var mySidebar = document.getElementById("mySidebar");
+
+// Get the DIV with overlay effect
+var overlayBg = document.getElementById("myOverlay");
+
+// Toggle between showing and hiding the sidebar, and add overlay effect
+function w3_open() {
+  if (mySidebar.style.display === 'block') {
+    mySidebar.style.display = 'none';
+    overlayBg.style.display = "none";
+  } else {
+    mySidebar.style.display = 'block';
+    overlayBg.style.display = "block";
+  }
+}
+
+// Close the sidebar with the close button
+function w3_close() {
+  mySidebar.style.display = "none";
+  overlayBg.style.display = "none";
+}
+</script>
+
+</body>
+</html>

@@ -38,6 +38,12 @@ pre {padding: 5px; margin: 5px; margin-top: 20px; width: 80%;}
   transition: 0.3s;
   width: 80%;
 }
+.card2 {
+  /* Add shadows to create the "card" effect */
+  margin-top: 15px;
+  padding-left: 15px;
+  width: 80%;
+}
 
 /* On mouse-over, add a deeper shadow */
 .card:hover {

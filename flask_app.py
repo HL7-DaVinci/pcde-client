@@ -26,6 +26,9 @@ def dummy(name=None):
 @app.route('/memberMatch')
 def memberMatch(name=None):
     return render_template('memberMatch.html', name=name)
+@app.route('/Tutorial')
+def tutorial(name=None):
+    return render_template('tutorial.html', name=name)
 @app.route('/CommunicationRequest')
 def comreq(name=None):
     return render_template('comreq.html', name=name)
