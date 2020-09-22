@@ -149,6 +149,7 @@ $(function() {
                         console.log("edi-x12")
                         supportingInfo += "<tr><td>Text: " + docRef["content"][0]["attachment"]["contentType"] + "</td></tr>";
                         supportingInfo += "<a download='file.txt' href='"+convertToTxt(docRef["content"][0]["attachment"]["data"])+"'>Download Text</a>";
+                        supportingInfo += "<div>" + parsex12(atob(docRef["content"][0]["attachment"]["data"])) + "</div>";
                     }
                     supportingInfo += "</table></div>";
                 } else if (data["entry"][i]["resource"]["resourceType"] == "MedicationDispense") {
@@ -272,6 +273,26 @@ function convertToTxt(b64) {
   link.download = 'file.txt';
   link.href = 'data:application/octet-stream;base64,' + b64;
   return link;
+}
+function parsex12(x12) {
+    let parsed = "";
+    x12.split("~").forEach(function(item) {
+        if (item.includes("*****46*560894904")) {
+            let parts = item.split("*");
+            parsed += "<div>Insurance: "+parts[3]+"</div>";
+        } else if (item.includes("NM1*IL*1*")) {
+            let parts = item.split("*");
+            parsed += "<div>Subscriber Name: "+parts[4] +" " + parts[3]+"</div>";
+        } else if (item.includes("N3")) {
+            let parts = item.split("*");
+            parsed += "<div>Address: "+parts[1];
+        } else if (item.includes("N4")) {
+            let parts = item.split("*");
+            parsed += ", "+parts[1] +", " + parts[2] +" " + parts[3] + "</div>";
+        }
+    });
+    return parsed;
+
 }
 function formatResource(data) {
     let formatter = null;
