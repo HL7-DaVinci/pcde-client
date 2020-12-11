@@ -1,9 +1,11 @@
 $(function() {
   $('#send-task').bind('click', function() {
     umb = $("#umb").val();
+    id = $("#task-id").val();
     $("#display").html("<div></div>");
     url = $("#url").val().replace(/\//g, '%2F');
-    $.getJSON('/send-task?id='+umb+'&url='+url,
+    console.log(id);
+    $.getJSON('/send-task?umb='+umb+'&id='+id+'&url='+url,
         function(data) {
           console.log(data)
           formatter = formatResource(data);
@@ -25,7 +27,34 @@ $(function() {
     });
     return false;
   });
+  $('#check-task').bind('click', function() {
+    id = $("#task-id").val();
+    $("#display").html("<div></div>");
+    url = $("#url").val().replace(/\//g, '%2F');
+    $.getJSON('/check-task?id='+id,
+        function(data) {
+          console.log(data)
+          formatter = formatResource(data);
+          formatter = "<div class='card'>" + formatter + "</div>";
+          $("#display").html(formatter);
+    });
+    return false;
+  });
+  $('#subscribe').bind('click', function() {
+    id = $("#task-id").val();
+    $("#display").html("<div></div>");
+    url = $("#url").val().replace(/\//g, '%2F');
+    $.getJSON('/subscribe?id='+id+'&url='+url,
+        function(data) {
+          console.log(data)
+          formatter = formatResource(data);
+          formatter = "<div class='card'>" + formatter + "</div>";
+          $("#display").html(formatter);
+    }) ;
+    return false;
+  });
 });
+
 function formatSample(data) {
   return "<h3>Full Response</h3><span style=\"white-space: pre-wrap\">"+syntaxHighlight((JSON.stringify(data, undefined, 4)))+"</span>";
 }
@@ -41,6 +70,9 @@ function formatResource(data) {
               formatter += "<h3>Bundle Location: " + data["output"][0]["valueReference"]["reference"] + "</h3>"
           }
           formatter += formatSample(data)
+      } else if (data["resourceType"] == "Subscription"){
+          formatter = formatSample(data);
+          return formatter;
       } else if (data["StatusCode"]) {
           formatter = "<h3>An error occured received " + data["StatusCode"] + "</h3>";
           formatter += formatSample(data);

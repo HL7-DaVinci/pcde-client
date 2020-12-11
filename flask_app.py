@@ -14,6 +14,8 @@ return_endpoint = client_url + 'receiveBundle'
 last_bundle = '{"text": "Bundle Not Found","status_code":"404"}'
 bundle_queue = []
 bundle_entries = {}
+task_entries = {}
+task_id = 0
 @app.route('/')
 def index(name=None):
     return render_template('index.html', name=name)
@@ -157,7 +159,6 @@ def member_match():
     param_data = get_member_match(given, family, bdate, sid, mid)
     url = request.args.get('url').replace("%2F", "/") if request.args.get('url') else base_url
     url += 'Patient/$member-match'
-    print(param_data)
     r = requests.post(url, json = param_data, headers=headers, verify=False)
     json_data = json.loads(r.text)
     if isinstance(json_data, int):
@@ -167,19 +168,45 @@ def member_match():
     return jsonify(**json_data)
 @app.route('/send-task')
 def send_task():
-    identifier = request.args.get('id')
-    task_data = get_task(identifier)
+    identifier = request.args.get('umb')
+    id = request.args.get('id')
+    task_data = make_task(identifier, id)
     url = request.args.get('url').replace("%2F", "/") if request.args.get('url') else base_url
-    if (url == base_url):
-        url += '/PCDE'
-    url += '/Task'
-    r = requests.post(url, json = task_data, headers=headers, verify=False)
+    if not id == '':
+        url += '/Task'
+        url += '/' + id
+        r = requests.put(url, json = task_data, headers=headers, verify=False)
+    else:
+        if (url == base_url):
+            url += '/PCDE'
+        url += '/Task'
+        r = requests.post(url, json = task_data, headers=headers, verify=False)
     json_data = json.loads(r.text)
     if isinstance(json_data, int):
         json_data = {"StatusCode": json_data}
     if r.status_code != 200:
         json_data["StatusCode"] = r.status_code
     return jsonify(**json_data)
+@app.route('/subscribe')
+def subscribe():
+    id = request.args.get('id')
+    url = request.args.get('url').replace("%2F", "/") if request.args.get('url') else base_url
+    subscription_data = make_subscription(id, client_url + '/sub-result')
+    url += "/Subscription"
+    r = requests.post(url, json = subscription_data, headers=headers, verify=False)
+    return jsonify(**json.loads(r.text))
+@app.route('/sub-result', methods=['GET', 'POST'])
+def sub_result():
+    data = json.loads(request.data.decode())
+    global task_entries
+    task_entries[data["id"]] = data
+    return json.dumps(data), 200, {'ContentType':'application/json'}
+
+@app.route('/clear-tasks')
+def clear_tasks():
+    task_entries = {}
+    return json.dumps(""), 200, {'ContentType':'application/json'}
+
 @app.route('/get-task')
 def get_task():
     identifier = request.args.get('id')
@@ -188,6 +215,10 @@ def get_task():
     r = requests.get(url, headers=headers, verify=False)
     json_data = json.loads(r.text)
     return jsonify(**json_data)
+@app.route('/check-task')
+def check_task():
+    identifier = request.args.get('id')
+    return jsonify(**task_entries[identifier])
 @app.route('/sample-mm')
 def sample_mm():
     given = request.args.get('given')
@@ -200,6 +231,36 @@ def sample_mm():
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
+def make_subscription(task_id, endpoint):
+    return {
+      "resourceType": "Subscription",
+      "id": "example",
+      "text": {
+        "status": "generated",
+        "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">[Put rendering here]</div>"
+      },
+      "status": "requested",
+      "contact": [
+        {
+          "system": "phone",
+          "value": "ext 4123"
+        }
+      ],
+      "end": "2021-01-01T00:00:00Z",
+      "reason": "Monitor new neonatal function",
+      "criteria": "Task?_id=" + task_id + "&code=pcde&status=completed",
+      "channel": {
+        "type": "rest-hook",
+        "endpoint": endpoint,
+        "payload": "application/fhir+json",
+        "header": [
+          "Authorization: Bearer secret-token-abc-123"
+        ]
+      }
+    }
+
+
 def make_request(pid, sid, rid):
     comreq = {
         "resourceType" : "CommunicationRequest",
@@ -342,10 +403,10 @@ def test_address():
       "country": "US"
     }
   ]
-def get_task(identifier):
+def make_task(identifier, id="requested"):
     return {
       "resourceType" : "Task",
-      "id" : "requested",
+      "id" : id,
       "text" : {
         "status" : "generated",
         "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative with Details</b></p><p><b>id</b>: requested</p><p><b>status</b>: requested</p><p><b>intent</b>: order</p><p><b>code</b>: Coverage Transition Document <span style=\"background: LightGoldenRodYellow\">(Details : {http://hl7.org/fhir/us/davinci-pcde/CodeSystem/PCDEtempCodes code 'pcde' = 'Coverage Transition Document', given as 'Coverage Transition Document'})</span></p><p><b>for</b>: </p><p><b>requester</b>: New Insurance Co Inc.</p><p><b>owner</b>: Original Insurance Co Inc.</p></div>"
