@@ -206,6 +206,10 @@ def clear_tasks():
     task_entries = {}
     return json.dumps(""), 200, {'ContentType':'application/json'}
 
+@app.route('/get-tasks')
+def get_tasks():
+    return jsonify(**task_entries)
+
 @app.route('/get-task')
 def get_task():
     identifier = request.args.get('id')
