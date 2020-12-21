@@ -172,14 +172,13 @@ def send_task():
     id = request.args.get('id')
     task_data = make_task(identifier, id)
     url = request.args.get('url').replace("%2F", "/") if request.args.get('url') else base_url
+    if (url == base_url):
+        url += '/PCDE'
+    url += '/Task'
     if not id == '':
-        url += '/Task'
         url += '/' + id
         r = requests.put(url, json = task_data, headers=headers, verify=False)
     else:
-        if (url == base_url):
-            url += '/PCDE'
-        url += '/Task'
         r = requests.post(url, json = task_data, headers=headers, verify=False)
     json_data = json.loads(r.text)
     if isinstance(json_data, int):
@@ -191,7 +190,7 @@ def send_task():
 def subscribe():
     id = request.args.get('id')
     url = request.args.get('url').replace("%2F", "/") if request.args.get('url') else base_url
-    subscription_data = make_subscription(id, client_url + '/sub-result')
+    subscription_data = make_subscription(id, client_url + 'sub-result')
     url += "/Subscription"
     r = requests.post(url, json = subscription_data, headers=headers, verify=False)
     return jsonify(**json.loads(r.text))
@@ -218,7 +217,10 @@ def get_task():
 @app.route('/check-task')
 def check_task():
     identifier = request.args.get('id')
-    return jsonify(**task_entries[identifier])
+    if identifier in task_entries.keys():
+        return jsonify(**task_entries[identifier])
+    else:
+        return jsonify({"error": "Task not found"})
 @app.route('/sample-mm')
 def sample_mm():
     given = request.args.get('given')
