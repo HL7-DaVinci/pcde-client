@@ -194,7 +194,7 @@ def subscribe():
     url += "/Subscription"
     r = requests.post(url, json = subscription_data, headers=headers, verify=False)
     return jsonify(**json.loads(r.text))
-@app.route('/sub-result', methods=['GET', 'POST'])
+@app.route('/sub-result', methods=['GET', 'POST', 'PUT'])
 def sub_result():
     data = json.loads(request.data.decode())
     global task_entries
