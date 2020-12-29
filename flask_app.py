@@ -194,11 +194,13 @@ def subscribe():
     url += "/Subscription"
     r = requests.post(url, json = subscription_data, headers=headers, verify=False)
     return jsonify(**json.loads(r.text))
-@app.route('/sub-result', methods=['GET', 'POST', 'PUT'])
-def sub_result():
+@app.route('/sub-result/Task/<id>', methods=['GET', 'POST', 'PUT'])
+def sub_result(id):
+    print("Recieved sub result")
+    print(id)
     data = json.loads(request.data.decode())
     global task_entries
-    task_entries[data["id"]] = data
+    task_entries[id] = data
     return json.dumps(data), 200, {'ContentType':'application/json'}
 
 @app.route('/clear-tasks')
