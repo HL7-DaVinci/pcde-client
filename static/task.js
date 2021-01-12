@@ -4,8 +4,13 @@ $(function() {
     id = $("#task-id").val();
     $("#display").html("<div></div>");
     url = $("#url").val().replace(/\//g, '%2F');
+
+    //token = $("#token").val();
+    token_url = $("#turl").val().replace(/\//g, '%2F');
+    cid = $("#cid").val();
+    cs = $("#cs").val();
     console.log(id);
-    $.getJSON('/send-task?umb='+umb+'&id='+id+'&url='+url,
+    $.getJSON('/send-task?umb='+umb+'&id='+id+'&url='+url+'&token_url='+token_url+'&cid='+cid+'&cs='+cs,
         function(data) {
           console.log(data)
           formatter = formatResource(data);

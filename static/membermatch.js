@@ -6,8 +6,9 @@ $(function() {
     sid = $("#sid").val();
     mid = $("#mid").val();
     $("#display").html("<div></div>");
+    token = $("#token").val();
     url = $("#url").val().replace(/\//g, '%2F');
-    $.getJSON('/member-match?given='+given+'&family='+family+'&birthdate='+bdate+'&sid='+sid+'&mid='+mid+'&url='+url,
+    $.getJSON('/member-match?given='+given+'&family='+family+'&birthdate='+bdate+'&sid='+sid+'&mid='+mid+'&url='+url+'&token='+token,
         function(data) {
           console.log(data)
           formatter = formatResource(data);

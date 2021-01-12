@@ -45,14 +45,17 @@ html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif;}
     <div class="w3-twothird w3-container">
       <h1 class="w3-text-teal">FHIR Endpoint</h1>
       <p>All requests are made to the endpoint: <input id="url" class="text-input endpoint" type="text" name="" value="https://davinci-pcde-ri.logicahealth.org/fhir/" placeholder="https://davinci-pcde-ri.logicahealth.org/fhir/"></p>
-        <p>The default endpoint is the reference server: <a href="https://davinci-pcde-ri.logicahealth.org/fhir/">https://davinci-pcde-ri.logicahealth.org/fhir/</a></p>
-      <p>To make more direct requests you can visit the reference server or post your own fhir requests</p>
     </div>
 
   </div>
 
   <div class="w3-row w3-padding-64">
     <div class="w3-twothird w3-container">
+      <h1 class="w3-text-teal">Authorization</h1>
+      If you want to skip this step leave the following field blank. If you need a token follow the process <a href="/Auth">here</a>
+      <table>
+        <tr><td><p class="w3-text-teal">Token</p></td><td><input id="token" class="text-input" type="text" name="" value="" placeholder="enter the authorization token"></td></tr>
+      </table>
       <form>
         <h1 class="w3-text-teal">Member Match</h1><br>
         <table>

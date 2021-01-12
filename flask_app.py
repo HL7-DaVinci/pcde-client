@@ -1,10 +1,10 @@
 from flask import *
-import requests
+import requests, subprocess
 import os
 import base64
 
 app = Flask(__name__)
-headers = {'Accept' : 'application/json', 'Content-Type' : 'application/json'}
+headers = {'Accept' : '*/*', 'Content-Type' : 'application/json'}
 base_url = 'https://davinci-pcde-ri.logicahealth.org/fhir/'#'http://localhost:8080/fhir/'#
 client_url = 'https://davinci-pcde-client.logicahealth.org/'#'https://davinci-pcde-ri.logicahealth.org/fhir/'##'http://localhost:5000/'#
 return_endpoint = client_url + 'receiveBundle'
@@ -45,6 +45,29 @@ def bundle(name=None):
 @app.route('/Task')
 def task(name=None):
     return render_template('task.html', name=name)
+@app.route('/Auth')
+def auth(name=None):
+    return render_template('token.html', name=name)
+
+
+@app.route('/getToken')
+def get_token():
+    print("TEST")
+    authorize_url = request.args.get('authorize_url').replace("%2F", "/")#"https://fhir.collablynk.com/oauth/authorize"
+    token_url = request.args.get('token_url').replace("%2F", "/")#"https://fhir.collablynk.com/oauth/token"
+
+    #callback URL specified when the application was defined
+    callback_uri = request.args.get('callback_uri').replace("%2F", "/")#"https://fhir.collablynk.com/fhir-experience/back"
+
+    client_id = request.args.get('client_id')
+    #client_secret = #'de827600-1cd8-4e8d-a581-1b1bd6369b03'
+
+    #scope = ''
+
+    # will return access_token
+    authorization_redirect_url = authorize_url + '?response_type=token&client_id=' + client_id + '&redirect_uri=' + callback_uri# + '&scope=openid'
+    data = {"auth_url": authorization_redirect_url}
+    return json.dumps(data), 200, {'ContentType':'application/json'}
 
 @app.route('/receiveBundle', methods=['GET', 'POST'])
 def receiveBundle():
@@ -83,17 +106,30 @@ def get_patient():
     bdate = request.args.get('birthdate')
     url = request.args.get('url').replace("%2F", "/") if request.args.get('url') else base_url
     url += 'Patient?given='+given+'&family='+family+'&birthdate='+bdate
-    r = requests.get(url, headers=headers, verify=False)
+    token = request.args.get('token')
+    temp_headers = headers
+    if not token == '' and not token is None:
+        temp_headers['Authorization'] = 'Bearer ' + token
+    r = requests.get(url, headers=temp_headers, verify=False)
     #print (r)
     json_data = json.loads(r.text)
     return jsonify(**json_data)
 @app.route('/getbundle')
 def get_bundle():
-    headers = {'Accept' : 'application/json', 'Content-Type' : 'application/json'}
     id = request.args.get('id')
     url = request.args.get('url').replace("%2F", "/") if request.args.get('url') else base_url
     url += 'Bundle/' + id
-    r = requests.get(url, headers=headers, verify=False)
+    token = request.args.get('token')
+    temp_headers = headers
+    token_url = request.args.get('token_url').replace("%2F", "/")
+    if not token_url == '' and not token_url is None:
+        client_id = request.args.get('cid')
+        client_secret = request.args.get('cs')
+        data = {'grant_type': 'client_credentials'}
+        access_token_response = requests.post(token_url, data=data, verify=False, allow_redirects=False, auth=(client_id, client_secret))
+        tokens = json.loads(access_token_response.text)
+        temp_headers['Authorization'] = 'Bearer ' + tokens['access_token']
+    r = requests.get(url, headers=temp_headers, verify=False)
     json_data = json.loads(r.text)
     return jsonify(**json_data)
 @app.route('/getcomreq')
@@ -159,7 +195,11 @@ def member_match():
     param_data = get_member_match(given, family, bdate, sid, mid)
     url = request.args.get('url').replace("%2F", "/") if request.args.get('url') else base_url
     url += 'Patient/$member-match'
-    r = requests.post(url, json = param_data, headers=headers, verify=False)
+    token = request.args.get('token')
+    temp_headers = headers
+    if not token == '' and not token is None:
+        temp_headers['Authorization'] = 'Bearer ' + token
+    r = requests.post(url, json = param_data, headers=temp_headers, verify=False)
     json_data = json.loads(r.text)
     if isinstance(json_data, int):
         json_data = {"StatusCode": json_data}
@@ -172,14 +212,29 @@ def send_task():
     id = request.args.get('id')
     task_data = make_task(identifier, id)
     url = request.args.get('url').replace("%2F", "/") if request.args.get('url') else base_url
+    token_url = request.args.get('token_url').replace("%2F", "/")
+    temp_headers = headers
     if (url == base_url):
-        url += '/PCDE'
-    url += '/Task'
-    if not id == '':
-        url += '/' + id
-        r = requests.put(url, json = task_data, headers=headers, verify=False)
+        url += 'PCDE/'
     else:
-        r = requests.post(url, json = task_data, headers=headers, verify=False)
+        task_data["for"]["reference"] = "Patient?identifier="+identifier
+    url += 'Task'
+    if not id == '' and not id == None:
+        url += '/' + id
+        print("SENDING PUT REQUEST")
+        r = requests.put(url, json = task_data, headers=temp_headers, verify=False)
+        print("SENT")
+    else:
+        #token = request.args.get('token')
+        if not token_url == '' and not token_url is None:
+            client_id = request.args.get('cid')
+            client_secret = request.args.get('cs')
+            data = {'grant_type': 'client_credentials'}
+            access_token_response = requests.post(token_url, data=data, verify=False, allow_redirects=False, auth=(client_id, client_secret))
+            tokens = json.loads(access_token_response.text)
+            temp_headers['Authorization'] = 'Bearer ' + tokens['access_token']
+
+        r = requests.post(url, json = task_data, headers=temp_headers, verify=False)
     json_data = json.loads(r.text)
     if isinstance(json_data, int):
         json_data = {"StatusCode": json_data}
@@ -192,7 +247,11 @@ def subscribe():
     url = request.args.get('url').replace("%2F", "/") if request.args.get('url') else base_url
     subscription_data = make_subscription(id, client_url + 'sub-result')
     url += "/Subscription"
-    r = requests.post(url, json = subscription_data, headers=headers, verify=False)
+    token = request.args.get('token')
+    temp_headers = headers
+    if not token == '' and not token is None:
+        temp_headers['Authorization'] = 'Bearer ' + token
+    r = requests.post(url, json = subscription_data, headers=temp_headers, verify=False)
     return jsonify(**json.loads(r.text))
 @app.route('/sub-result/Task/<id>', methods=['GET', 'POST', 'PUT'])
 def sub_result(id):
@@ -217,7 +276,11 @@ def get_task():
     identifier = request.args.get('id')
     url = request.args.get('url').replace("%2F", "/") if request.args.get('url') else base_url
     url += ('/Task/' + str(identifier))
-    r = requests.get(url, headers=headers, verify=False)
+    token = request.args.get('token')
+    temp_headers = headers
+    if not token == '' and not token is None:
+        temp_headers['Authorization'] = 'Bearer ' + token
+    r = requests.get(url, headers=temp_headers, verify=False)
     json_data = json.loads(r.text)
     return jsonify(**json_data)
 @app.route('/check-task')

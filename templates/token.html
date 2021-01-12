@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-<script src="/static/bundle.js"></script>
+<script src="/static/token.js"></script>
 <style>
 html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif;}
 .w3-sidebar {
@@ -38,71 +38,39 @@ html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif;}
       <p>This server provides a client for interacting with the <a href="https://davinci-pcde-ri.logicahealth.org/">Da Vinci Payer Coverage Decision Exchange Reference Implementation.</a></p>
       <p>To use a different part of the client click on one of links on the side menu.</p>
     </div>
-    <!-- <div class="w3-third w3-container">
-      <p class="w3-border w3-padding-large w3-padding-32 w3-center">AD</p>
-      <p class="w3-border w3-padding-large w3-padding-64 w3-center">AD</p>
-    </div> -->
+
   </div>
 
-  <div class="w3-row">
+  <!-- <div class="w3-row">
     <div class="w3-twothird w3-container">
       <h1 class="w3-text-teal">FHIR Endpoint</h1>
       <p>All requests are made to the endpoint: <input id="url" class="text-input endpoint" type="text" name="" value="https://davinci-pcde-ri.logicahealth.org/fhir/" placeholder="https://davinci-pcde-ri.logicahealth.org/fhir/"></p>
+        <p>The default endpoint is the reference server: <a href="https://davinci-pcde-ri.logicahealth.org/fhir/">https://davinci-pcde-ri.logicahealth.org/fhir/</a></p>
+      <p>To make more direct requests you can visit the reference server or post your own fhir requests</p>
     </div>
 
-  </div>
+  </div> -->
 
   <div class="w3-row w3-padding-64">
-
     <div class="w3-twothird w3-container">
-      <h1 class="w3-text-teal">Authorization</h1>
-      If you want to skip this step leave the following fields blank
-      <table>
-        <tr><td><p class="w3-text-teal">Token URL</p></td><td><input id="turl" class="text-input" type="text" name="" value="" placeholder="enter the token url"></td></tr>
-        <tr><td><p class="w3-text-teal">Client Id</p></td><td><input id="cid" class="text-input" type="text" name="" value="" placeholder="enter the client id"></td></tr>
-        <tr><td><p class="w3-text-teal">Client Secret</p></td><td><input id="cs" class="text-input" type="text" name="" value="" placeholder="enter the client secret"></td></tr>
-      </table>
-      <h1 class="w3-text-teal">Get PCDE Bundle</h1>
-      <input id="pid" class="text-input" type="text" name="" value="" placeholder="enter the id"><button id="gp" class="w3-hover-white submit-button" type="submit" name="bundle">Get Bundle</button>
+      <form>
+        <h1 class="w3-text-teal">Authorization Request (Implicit)</h1><br>
+        <table>
+        <tr><td><p class="w3-text-teal">Authorization URL</p></td><td><input id="aurl" class="text-input" type="text" name="" value="https://fhir.collablynk.com/oauth/authorize" placeholder="enter the authorization url"></td></tr>
+        <tr><td><p class="w3-text-teal">Token URL</p></td><td><input id="turl" class="text-input" type="text" name="" value="https://fhir.collablynk.com/oauth/token" placeholder="enter the token url"></td></tr>
+        <tr><td><p class="w3-text-teal">Callback URI</p></td><td><input id="curi" class="text-input" type="text" name="" value="https://fhir.collablynk.com/fhir-experience/back" placeholder="enter the callback uri"></td></tr>
+        <tr><td><p class="w3-text-teal">Client Id</p></td><td><input id="cid" class="text-input" type="text" name="" value="fhir-pcde-patient-client" placeholder="enter the client id"></td></tr>
+        </table>
+      </form>
+      <div><button id="gt" class="w3-hover-white submit-button" type="submit" name="getToken">Get URL</button></div>
     </div>
 
-  </div>
-  <div id="collapseContainer" style="display: none" class="indent overflow">
-      <button type="button" class="collapsible">Patient</button>
-      <div class="content">
-        <p id="patientContent">Patient Stuff</p>
-      </div>
-      <button type="button" class="collapsible">Active Treatment</button>
-      <div class="content">
-        <button type="button" class="collapsible">Medications</button>
-        <div class="content">
-          <p id="medicineContent">medicine</p>
-        </div>
-        <button type="button" class="collapsible">Medical Equipment</button>
-        <div class="content">
-          <p id="equipmentContent">equipment</p>
-        </div>
-        <button type="button" class="collapsible">Services</button>
-        <div class="content">
-          <p id="other">services</p>
-        </div>
-      </div>
-      <button type="button" class="collapsible">Supporting Information</button>
-      <div class="content">
-        <p id="supInf">Supporting Information</p>
-        <div id="pdfDiv"></div>
-      </div>
-      <button type="button" class="collapsible">Full Bundle</button>
-      <div class="content">
-        <p id="bundle">Full Bundle</p>
-      </div>
-  </div>
-  <div id="display" class="indent">
 
   </div>
+  <div id="display" class="indent"></div>
+  <br>
+  <br>
   <pre id="json"></pre>
-
-
   <br>
   <br>
   <br>
@@ -111,7 +79,6 @@ html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif;}
     <div class="w3-container w3-theme-l2 w3-padding-32">
       <h4></h4>
     </div>
-
   </footer>
 
 <!-- END MAIN -->

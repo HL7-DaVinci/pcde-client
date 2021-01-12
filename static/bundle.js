@@ -27,8 +27,11 @@ $(function() {
   $('#gp').bind('click', function() {
     id = $("#pid").val();
     url = $("#url").val().replace(/\//g, '%2F');
+    token_url = $("#turl").val().replace(/\//g, '%2F');
+    cid = $("#cid").val();
+    cs = $("#cs").val();
     $("#display").html("<div></div>");
-    $.getJSON('/getbundle?id='+id+'&url='+url,
+    $.getJSON('/getbundle?id='+id+'&url='+url+'&token_url='+token_url+'&cid='+cid+'&cs='+cs,
         function(data) {
           document.getElementById("collapseContainer").style.display = "none";
           formatter = formatResource(data);
@@ -66,7 +69,7 @@ $(function() {
                   $("#patientContent").html(pDisplay);
                   div += "<h3>Patient</h3>"+data["entry"][i]["resource"]["text"]["div"];
                 }
-                else if (data["entry"][i]["resource"]["resourceType"] == "Organization") {
+                else if (data["entry"][i]["resource"]["resourceType"] == "Organization" && data["entry"][i]["resource"]["text"]) {
                   div += "<h3>Payer</h3>"+data["entry"][i]["resource"]["text"]["div"];
                 }
                 else if (data["entry"][i]["resource"]["resourceType"] == "CarePlan") {

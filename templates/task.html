@@ -45,27 +45,34 @@ html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif;}
     <div class="w3-twothird w3-container">
       <h1 class="w3-text-teal">FHIR Endpoint</h1>
       <p>All requests are made to the endpoint: <input id="url" class="text-input endpoint" type="text" name="" value="https://davinci-pcde-ri.logicahealth.org/fhir/" placeholder="https://davinci-pcde-ri.logicahealth.org/fhir/"></p>
-        <p>The default endpoint is the reference server: <a href="https://davinci-pcde-ri.logicahealth.org/fhir/">https://davinci-pcde-ri.logicahealth.org/fhir/</a></p>
-      <p>To make more direct requests you can visit the reference server or post your own fhir requests</p>
     </div>
 
   </div>
 
   <div class="w3-row w3-padding-64">
     <div class="w3-twothird w3-container">
+      <h1 class="w3-text-teal">Authorization</h1>
+      If you want to skip this step leave the following fields blank
+      <table>
+        <tr><td><p class="w3-text-teal">Token URL</p></td><td><input id="turl" class="text-input" type="text" name="" value="" placeholder="enter the token url"></td></tr>
+        <tr><td><p class="w3-text-teal">Client Id</p></td><td><input id="cid" class="text-input" type="text" name="" value="" placeholder="enter the client id"></td></tr>
+        <tr><td><p class="w3-text-teal">Client Secret</p></td><td><input id="cs" class="text-input" type="text" name="" value="" placeholder="enter the client secret"></td></tr>
+      </table>
       <form>
-        <h1 class="w3-text-teal">PCDE Task</h1><br>
+        <h1 class="w3-text-teal">PCDE Task Creation</h1><br>
         <table>
         <tr><td><p class="w3-text-teal">Patient UMB</p></td><td><input id="umb" class="text-input" type="text" name="" value="" placeholder="enter the umb for the patient"></td></tr>
         </table>
+        <div><button id="send-task" class="w3-hover-white submit-button" type="submit" name="task">Send Task</button></div>
+        <h1 class="w3-text-teal">Subscribe to the Task</h1>
+        <div><p class="w3-text-teal">Use the following for Subscription</p></div>
         <table>
         <tr><td><p class="w3-text-teal">Task Id</p></td><td><input id="task-id" class="text-input" type="text" name="" value="" placeholder="enter the task id to poll"></td></tr>
         </table>
-        <div><button id="send-task" class="w3-hover-white submit-button" type="submit" name="task">Send Task</button></div>
-        <div><p class="w3-text-teal">Use the following for Subscription</p><div>
-        <div><button id="subscribe" class="w3-hover-white submit-button" type="submit" name="sub">Subscibe to Task</button></div>
+        <div><button id="subscribe" class="w3-hover-white submit-button" type="submit" name="sub">Subscibe to Task</button></div><br>
         <div><button id="check-task" class="w3-hover-white submit-button" type="submit" name="ctask">Check for Task</button></div>
-        <div><p class="w3-text-teal">Use the following for Polling</p><div>
+        <h1 class="w3-text-teal">Poll the Task</h1>
+        <div><p class="w3-text-teal">Use the following for Polling</p></div>
         <div><button id="poll-task" class="w3-hover-white submit-button" type="submit" name="poll">Poll Task</button></div>
       </form>
     </div>
