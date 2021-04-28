@@ -245,7 +245,7 @@ def send_task():
 def subscribe():
     id = request.args.get('id')
     url = request.args.get('url').replace("%2F", "/") if request.args.get('url') else base_url
-    subscription_data = make_subscription(id, client_url + 'sub-result')
+    subscription_data = make_backport_sub(id, client_url + 'sub-result')
     url += "/Subscription"
     token = request.args.get('token')
     temp_headers = headers
