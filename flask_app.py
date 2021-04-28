@@ -69,36 +69,36 @@ def get_token():
     data = {"auth_url": authorization_redirect_url}
     return json.dumps(data), 200, {'ContentType':'application/json'}
 
-@app.route('/receiveBundle', methods=['GET', 'POST'])
-def receiveBundle():
-    data = request.data
-    global bundle_queue
-    global bundle_entries
-    #print(bundle_queue)
-    bundle_entries[bundle_queue.pop(0)] = data
-    #print(bundle_entries)
-    # print(data)
-    return json.dumps(data), 200, {'ContentType':'application/json'}
-@app.route('/getlastbundle')
-def get_last_bundle():
-    global last_bundle
-    global bundle_entries
-    given = request.args.get('given')
-    family = request.args.get('family')
-    bdate = request.args.get('birthdate')
-    identifier = request.args.get('identifier')
-    bundle_key = (given+family+bdate+identifier)
-    #print(bundle_entries)
-    if (bundle_key in bundle_entries.keys()):
-        json_data = json.loads(bundle_entries.pop(bundle_key))
-        try:
-            encoding = str(json_data["entry"][0]["resource"]["payload"][0]["contentAttachment"]["data"])
-            json_data["entry"][0]["resource"]["payload"][0]["contentAttachment"]["data"] = str(base64.b64decode(encoding))
-        except Exception as e:
-            print(e)
-    else:
-        json_data = json.loads(last_bundle)
-    return jsonify(**json_data)
+# @app.route('/receiveBundle', methods=['GET', 'POST'])
+# def receiveBundle():
+#     data = request.data
+#     global bundle_queue
+#     global bundle_entries
+#     #print(bundle_queue)
+#     bundle_entries[bundle_queue.pop(0)] = data
+#     #print(bundle_entries)
+#     # print(data)
+#     return json.dumps(data), 200, {'ContentType':'application/json'}
+# @app.route('/getlastbundle')
+# def get_last_bundle():
+#     global last_bundle
+#     global bundle_entries
+#     given = request.args.get('given')
+#     family = request.args.get('family')
+#     bdate = request.args.get('birthdate')
+#     identifier = request.args.get('identifier')
+#     bundle_key = (given+family+bdate+identifier)
+#     #print(bundle_entries)
+#     if (bundle_key in bundle_entries.keys()):
+#         json_data = json.loads(bundle_entries.pop(bundle_key))
+#         try:
+#             encoding = str(json_data["entry"][0]["resource"]["payload"][0]["contentAttachment"]["data"])
+#             json_data["entry"][0]["resource"]["payload"][0]["contentAttachment"]["data"] = str(base64.b64decode(encoding))
+#         except Exception as e:
+#             print(e)
+#     else:
+#         json_data = json.loads(last_bundle)
+#     return jsonify(**json_data)
 @app.route('/getpatient')
 def get_patient():
     given = request.args.get('given')
@@ -261,6 +261,24 @@ def sub_result(id):
     global task_entries
     task_entries[id] = data
     return json.dumps(data), 200, {'ContentType':'application/json'}
+@app.route('/sub-result/Bundle/<id>', methods=['GET', 'POST', 'PUT'])
+def sub_result_bundle(id):
+    print("Recieved sub result")
+    print(id)
+    data = json.loads(request.data.decode())
+    global bundle_entries
+    bundle_entries[id] = data
+    return json.dumps(data), 200, {'ContentType':'application/json'}
+
+@app.route('/clear-bundles')
+def clear_bundle():
+    bundle_entries = {}
+    return json.dumps(""), 200, {'ContentType':'application/json'}
+
+@app.route('/get-bundles')
+def get_bundles():
+    return jsonify(**bundle_entries)
+
 
 @app.route('/clear-tasks')
 def clear_tasks():
@@ -303,6 +321,8 @@ def sample_mm():
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
+def process_bundle(bundle):
+    return bundle
 def make_subscription(task_id, endpoint):
     return {
       "resourceType": "Subscription",
@@ -330,6 +350,65 @@ def make_subscription(task_id, endpoint):
         ]
       }
     }
+def make_backport_sub(task_id, endpoint):
+    return {
+      "resourceType" : "Subscription",
+      "id" : "subscription-multi-resource",
+      "meta" : {
+        "profile" : [
+          "http://hl7.org/fhir/uv/subscriptions-backport/StructureDefinition/backport-subscription"
+        ]
+      },
+      "text" : {
+        "status" : "extensions",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative</b></p><p><b>Backport R5 Subscription Topic Canonical</b>: <a href=\"http://example.org/fhir/SubscriptionTopic/PatientEncounterObservation\">http://example.org/fhir/SubscriptionTopic/PatientEncounterObservation</a></p><p><b>status</b>: active</p><p><b>end</b>: Dec 31, 2020, 12:00:00 PM</p><p><b>reason</b>: Example Backported Subscription for Multiple Resources</p><p><b>criteria</b>: Patient?id=Patient/123</p><h3>Channels</h3><table class=\"grid\"><tr><td>-</td><td><b>Extension</b></td><td><b>Type</b></td><td><b>Endpoint</b></td><td><b>Payload</b></td><td><b>Header</b></td></tr><tr><td>*</td><td>, , , </td><td>rest-hook</td><td><a href=\"https://example.org/Endpoints/d7dcc004-808d-452b-8030-3a3a13cd871d\">https://example.org/Endpoints/d7dcc004-808d-452b-8030-3a3a13cd871d</a></td><td>application/fhir+json</td><td>Authorization: Bearer secret-token-abc-123</td></tr></table></div>"
+      },
+      "extension" : [
+        {
+          "url" : "http://hl7.org/fhir/uv/subscriptions-backport/StructureDefinition/backport-topic-canonical",
+          "valueUri" : "http://example.org/fhir/SubscriptionTopic/PatientEncounterObservation"
+        }
+      ],
+      "status" : "active",
+      "end" : "2020-12-31T12:00:00Z",
+      "reason" : "Example Backported Subscription for Multiple Resources",
+      "criteria" : "Task?_id=" + task_id + "code=pcde&status=completed",
+      "channel" : {
+        "extension" : [
+          {
+            "url" : "http://hl7.org/fhir/uv/subscriptions-backport/StructureDefinition/backport-heartbeat-period",
+            "valueUnsignedInt" : 86400
+          },
+          {
+            "url" : "http://hl7.org/fhir/uv/subscriptions-backport/StructureDefinition/backport-timeout",
+            "valueUnsignedInt" : 60
+          },
+          {
+            "url" : "http://hl7.org/fhir/uv/subscriptions-backport/StructureDefinition/backport-notification-url-location",
+            "valueCode" : "all"
+          },
+          {
+            "url" : "http://hl7.org/fhir/uv/subscriptions-backport/StructureDefinition/backport-max-count",
+            "valuePositiveInt" : 20
+          }
+        ],
+        "type" : "rest-hook",
+        "endpoint" : endpoint,
+        "payload" : "application/fhir+json",
+        "_payload" : {
+          "extension" : [
+            {
+              "url" : "http://hl7.org/fhir/uv/subscriptions-backport/StructureDefinition/backport-payload-content",
+              "valueCode" : "id-only"
+            }
+          ]
+        },
+        "header" : [
+          "Authorization: Bearer secret-token-abc-123"
+        ]
+      }
+    }
+
 
 
 def make_request(pid, sid, rid):
