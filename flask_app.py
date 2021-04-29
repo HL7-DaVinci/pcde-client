@@ -372,7 +372,7 @@ def make_backport_sub(task_id, endpoint):
       "status" : "active",
       "end" : "2020-12-31T12:00:00Z",
       "reason" : "Example Backported Subscription for Multiple Resources",
-      "criteria" : "Task?_id=" + task_id + "code=pcde&status=completed",
+      "criteria" : "Task?_id=" + task_id + "&code=pcde&status=completed",
       "channel" : {
         "extension" : [
           {
