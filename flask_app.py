@@ -16,6 +16,7 @@ bundle_queue = []
 bundle_entries = {}
 task_entries = {}
 task_id = 0
+bundle_id = 0
 @app.route('/')
 def index(name=None):
     return render_template('index.html', name=name)
@@ -264,14 +265,15 @@ def sub_result(id):
 @app.route('/sub-result/Bundle', methods=['GET', 'POST', 'PUT'])
 def sub_result_bundle():
     print("Recieved sub result")
-    print(id)
     data = json.loads(request.data.decode())
     global bundle_entries
-    bundle_entries[1] = data
+    bundle_entries[str(bundle_id)] = data
+    bundle_id += 1
     return json.dumps(data), 200, {'ContentType':'application/json'}
 
 @app.route('/clear-bundles')
 def clear_bundle():
+    bundle_id = 0
     bundle_entries = {}
     return json.dumps(""), 200, {'ContentType':'application/json'}
 
