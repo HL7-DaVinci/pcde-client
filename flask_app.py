@@ -261,13 +261,13 @@ def sub_result(id):
     global task_entries
     task_entries[id] = data
     return json.dumps(data), 200, {'ContentType':'application/json'}
-@app.route('/sub-result/Bundle/<id>', methods=['GET', 'POST', 'PUT'])
-def sub_result_bundle(id):
+@app.route('/sub-result/Bundle', methods=['GET', 'POST', 'PUT'])
+def sub_result_bundle():
     print("Recieved sub result")
     print(id)
     data = json.loads(request.data.decode())
     global bundle_entries
-    bundle_entries[id] = data
+    bundle_entries[1] = data
     return json.dumps(data), 200, {'ContentType':'application/json'}
 
 @app.route('/clear-bundles')
