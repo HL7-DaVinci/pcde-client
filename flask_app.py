@@ -267,6 +267,7 @@ def sub_result_bundle():
     print("Recieved sub result")
     data = json.loads(request.data.decode())
     global bundle_entries
+    global bundle_id
     bundle_entries[str(bundle_id)] = data
     bundle_id += 1
     return json.dumps(data), 200, {'ContentType':'application/json'}
@@ -322,6 +323,22 @@ def sample_mm():
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+@app.route('/task-for/<patient_id>')
+def task_for(patient_id):
+    return jsonify(**get_task_from_notification(patient_id))
+def get_task_from_notification(patient_id):
+    global bundle_id
+    global bundle_entries
+    for i in range(0, bundle_id):
+        bundle = bundle_entries[str(i)]
+        try:
+            task = bundle["entry"][1]
+            task_for = task["resource"]["for"]["identifier"]["value"]
+            if str(patient_id) == str(task_for):
+                return task
+        except Exception as e:
+            print(e)
+    return ""
 
 def process_bundle(bundle):
     return bundle
