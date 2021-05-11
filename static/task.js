@@ -36,7 +36,7 @@ $(function() {
     id = $("#task-id").val();
     $("#display").html("<div></div>");
     url = $("#url").val().replace(/\//g, '%2F');
-    $.getJSON('/check-task?id='+id,
+    $.getJSON('/task-for/'+id,
         function(data) {
           console.log(data)
           formatter = formatResource(data);
