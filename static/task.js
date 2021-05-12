@@ -1,6 +1,10 @@
 $(function() {
   $('#send-task').bind('click', function() {
     umb = $("#umb").val();
+    if (umb === "") {
+        $("#display").html("<div class='card'>Patient Id must be filled out</div>");
+        return false;
+    }
     id = $("#task-id").val();
     $("#display").html("<div></div>");
     url = $("#url").val().replace(/\//g, '%2F');
@@ -12,7 +16,6 @@ $(function() {
     console.log(id);
     $.getJSON('/send-task?umb='+umb+'&id='+id+'&url='+url+'&token_url='+token_url+'&cid='+cid+'&cs='+cs,
         function(data) {
-          console.log(data)
           formatter = formatResource(data);
           formatter = "<div class='card'>" + formatter + "</div>";
           $("#display").html(formatter);
@@ -21,11 +24,14 @@ $(function() {
   });
   $('#poll-task').bind('click', function() {
     id = $("#task-id").val();
+    if (id === "") {
+        $("#display").html("<div class='card'>Task Id must be filled out</div>");
+        return false;
+    }
     $("#display").html("<div></div>");
     url = $("#url").val().replace(/\//g, '%2F');
     $.getJSON('/get-task?id='+id+'&url='+url,
         function(data) {
-          console.log(data)
           formatter = formatResource(data);
           formatter = "<div class='card'>" + formatter + "</div>";
           $("#display").html(formatter);
@@ -33,12 +39,15 @@ $(function() {
     return false;
   });
   $('#check-task').bind('click', function() {
-    id = $("#task-id").val();
+    id = $("#umb").val();
+    if (id === "") {
+        $("#display").html("<div class='card'>Patient Id must be filled out</div>");
+        return false;
+    }
     $("#display").html("<div></div>");
     url = $("#url").val().replace(/\//g, '%2F');
     $.getJSON('/task-for/'+id,
         function(data) {
-          console.log(data)
           formatter = formatResource(data);
           formatter = "<div class='card'>" + formatter + "</div>";
           $("#display").html(formatter);
@@ -51,7 +60,6 @@ $(function() {
     url = $("#url").val().replace(/\//g, '%2F');
     $.getJSON('/subscribe?id='+id+'&url='+url,
         function(data) {
-          console.log(data)
           formatter = formatResource(data);
           formatter = "<div class='card'>" + formatter + "</div>";
           $("#display").html(formatter);
