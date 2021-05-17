@@ -335,7 +335,7 @@ def get_task_from_notification(patient_id):
             task = bundle["entry"][1]
             task_for = task["resource"]["for"]["identifier"]["value"]
             if str(patient_id) == str(task_for):
-                return task
+                return task["resource"]
         except Exception as e:
             print(e)
     return ""
