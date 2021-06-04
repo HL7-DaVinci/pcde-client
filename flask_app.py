@@ -7,12 +7,9 @@ app = Flask(__name__)
 headers = {'Accept' : '*/*', 'Content-Type' : 'application/json'}
 base_url = 'https://davinci-pcde-ri.logicahealth.org/fhir/'#'http://localhost:8080/fhir/'#
 client_url = 'https://davinci-pcde-client.logicahealth.org/'#'https://davinci-pcde-ri.logicahealth.org/fhir/'##'http://localhost:5000/'#
-return_endpoint = client_url + 'receiveBundle'
 
 # Simple method to make data tempory
 # NOTE: Do not use in production
-last_bundle = '{"text": "Bundle Not Found","status_code":"404"}'
-bundle_queue = []
 bundle_entries = {}
 task_entries = {}
 task_id = 0
@@ -32,13 +29,6 @@ def memberMatch(name=None):
 @app.route('/Tutorial')
 def tutorial(name=None):
     return render_template('tutorial.html', name=name)
-@app.route('/CommunicationRequest')
-def comreq(name=None):
-    return render_template('comreq.html', name=name)
-
-@app.route('/CommunicationRequestb')
-def comreqb(name=None):
-    return render_template('comreqb.html', name=name)
 
 @app.route('/Bundle')
 def bundle(name=None):
@@ -54,52 +44,18 @@ def auth(name=None):
 @app.route('/getToken')
 def get_token():
     print("TEST")
-    authorize_url = request.args.get('authorize_url').replace("%2F", "/")#"https://fhir.collablynk.com/oauth/authorize"
-    token_url = request.args.get('token_url').replace("%2F", "/")#"https://fhir.collablynk.com/oauth/token"
+    authorize_url = request.args.get('authorize_url').replace("%2F", "/")
+    token_url = request.args.get('token_url').replace("%2F", "/")
 
     #callback URL specified when the application was defined
-    callback_uri = request.args.get('callback_uri').replace("%2F", "/")#"https://fhir.collablynk.com/fhir-experience/back"
+    callback_uri = request.args.get('callback_uri').replace("%2F", "/")
 
     client_id = request.args.get('client_id')
-    #client_secret = #'de827600-1cd8-4e8d-a581-1b1bd6369b03'
-
-    #scope = ''
-
     # will return access_token
     authorization_redirect_url = authorize_url + '?response_type=token&client_id=' + client_id + '&redirect_uri=' + callback_uri# + '&scope=openid'
     data = {"auth_url": authorization_redirect_url}
     return json.dumps(data), 200, {'ContentType':'application/json'}
 
-# @app.route('/receiveBundle', methods=['GET', 'POST'])
-# def receiveBundle():
-#     data = request.data
-#     global bundle_queue
-#     global bundle_entries
-#     #print(bundle_queue)
-#     bundle_entries[bundle_queue.pop(0)] = data
-#     #print(bundle_entries)
-#     # print(data)
-#     return json.dumps(data), 200, {'ContentType':'application/json'}
-# @app.route('/getlastbundle')
-# def get_last_bundle():
-#     global last_bundle
-#     global bundle_entries
-#     given = request.args.get('given')
-#     family = request.args.get('family')
-#     bdate = request.args.get('birthdate')
-#     identifier = request.args.get('identifier')
-#     bundle_key = (given+family+bdate+identifier)
-#     #print(bundle_entries)
-#     if (bundle_key in bundle_entries.keys()):
-#         json_data = json.loads(bundle_entries.pop(bundle_key))
-#         try:
-#             encoding = str(json_data["entry"][0]["resource"]["payload"][0]["contentAttachment"]["data"])
-#             json_data["entry"][0]["resource"]["payload"][0]["contentAttachment"]["data"] = str(base64.b64decode(encoding))
-#         except Exception as e:
-#             print(e)
-#     else:
-#         json_data = json.loads(last_bundle)
-#     return jsonify(**json_data)
 @app.route('/getpatient')
 def get_patient():
     given = request.args.get('given')
@@ -112,7 +68,6 @@ def get_patient():
     if not token == '' and not token is None:
         temp_headers['Authorization'] = 'Bearer ' + token
     r = requests.get(url, headers=temp_headers, verify=False)
-    #print (r)
     json_data = json.loads(r.text)
     return jsonify(**json_data)
 @app.route('/getbundle')
@@ -132,59 +87,6 @@ def get_bundle():
         temp_headers['Authorization'] = 'Bearer ' + tokens['access_token']
     r = requests.get(url, headers=temp_headers, verify=False)
     json_data = json.loads(r.text)
-    return jsonify(**json_data)
-@app.route('/getcomreq')
-def get_comreq():
-    headers = {'Accept' : 'application/json', 'Content-Type' : 'application/json'}
-    id = request.args.get('id')
-    url = request.args.get('url').replace("%2F", "/") if request.args.get('url') else base_url
-    url += 'CommunicationRequest/' + id
-    r = requests.get(url, headers=headers, verify=False)
-    #print (r)
-    json_data = json.loads(r.text)
-    return jsonify(**json_data)
-@app.route('/postcomreqb')
-def post_comreqb():
-    global bundle_queue
-    global last_bundle
-    headers = {'Accept' : 'application/json', 'Content-Type' : 'application/json'}
-    pid = 1
-    rid = 2
-    sid = 3
-    given = request.args.get('given')
-    family = request.args.get('family')
-    bdate = request.args.get('birthdate')
-    identifier = request.args.get('identifier')
-    bundle_key = given+family+bdate+identifier
-    bundle_queue.append(bundle_key)
-    print(bundle_queue)
-    patient_info = {"given":given, "family":family, "birthdate":bdate, "identifier": identifier}
-    req_data = make_bundle_request(pid, sid, rid, patient_info)
-    #print(req_data)
-    url = request.args.get('url').replace("%2F", "/") if request.args.get('url') else base_url
-    r = requests.post(url, json = req_data, headers=headers, verify=False)
-    json_data = json.loads(r.text)
-    encoding = str(json_data["payload"][0]["contentAttachment"]["data"])
-    json_data["payload"][0]["contentAttachment"]["data"] = str(base64.b64decode(encoding))
-    json_data["status_code"] = r.status_code
-    #print(r.text)
-    return jsonify(**json_data)
-@app.route('/postcomreq')
-def post_comreq():
-    pid = request.args.get('pid')
-    rid = request.args.get('rid')
-    sid = request.args.get('sid')
-
-    req_data = make_request(pid, sid, rid)
-    url = request.args.get('url').replace("%2F", "/") if request.args.get('url') else base_url
-    url += 'PCDE'
-    r = requests.post(url, json = req_data, headers=headers, verify=False)
-    json_data = json.loads(r.text)
-    #print (json_data["payload"][0]["contentAttachment"]["data"])
-    encoding = str(json_data["payload"][0]["contentAttachment"]["data"])
-    json_data["payload"][0]["contentAttachment"]["data"] = str(base64.b64decode(encoding))
-    #print("get this")
-    #print(r.text)
     return jsonify(**json_data)
 @app.route('/member-match')
 def member_match():
@@ -226,7 +128,6 @@ def send_task():
         r = requests.put(url, json = task_data, headers=temp_headers, verify=False)
         print("SENT")
     else:
-        #token = request.args.get('token')
         if not token_url == '' and not token_url is None:
             client_id = request.args.get('cid')
             client_secret = request.args.get('cs')
@@ -271,18 +172,6 @@ def sub_result_bundle():
     bundle_entries[str(bundle_id)] = data
     bundle_id += 1
     return json.dumps(data), 200, {'ContentType':'application/json'}
-
-@app.route('/clear-bundles')
-def clear_bundle():
-    bundle_id = 0
-    bundle_entries = {}
-    return json.dumps(""), 200, {'ContentType':'application/json'}
-
-@app.route('/get-bundles')
-def get_bundles():
-    return jsonify(**bundle_entries)
-
-
 @app.route('/clear-tasks')
 def clear_tasks():
     task_entries = {}
@@ -428,138 +317,6 @@ def make_backport_sub(task_id, endpoint):
       }
     }
 
-
-
-def make_request(pid, sid, rid):
-    comreq = {
-        "resourceType" : "CommunicationRequest",
-        "id" : "1",
-        "text" : {
-        "status" : "generated",
-        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative with Details</b></p><p><b>id</b>: 1</p><p><b>status</b>: active</p><p><b>subject</b>: <a href=\"Patient/1\">Patient/1</a></p><h3>Payloads</h3><table class=\"grid\"><tr><td>-</td><td><b>Extension</b></td><td><b>Content[x]</b></td></tr><tr><td>*</td><td/><td>Please send previous coverage information.</td></tr></table><p><b>requester</b>: <a href=\"Organization/"+str(rid)+"\">Organization/"+str(rid)+"</a></p><p><b>recipient</b>: <a href=\"Organization/"+str(rid)+"\">Organization/"+str(rid)+"</a></p><p><b>sender</b>: <a href=\"Organization/"+str(sid)+"\">Organization/"+str(sid)+"</a></p></div>"
-        },
-        "status" : "active",
-        "subject" : {
-        "reference" : "Patient/"+str(pid)
-        },
-        "payload" : [
-        {
-          "extension" : [
-            {
-              "url" : "http://hl7.org/fhir/us/davinci-cdex/StructureDefinition/cdex-payload-clinical-note-type",
-              "valueCodeableConcept" : {
-                "coding" : [
-                  {
-                    "system" : "http://hl7.org/fhir/us/davinci-pcde/CodeSystem/PCDEDocumentCode",
-                    "code" : "pcde"
-                  }
-                ]
-              }
-            }
-          ],
-          "contentString" : "Please send previous coverage information."
-        }
-        ],
-        "requester" : {
-        "reference" : "Organization/"+str(rid)
-        },
-        "recipient" : [
-        {
-          "reference" : "Organization/"+str(rid)
-        }
-        ],
-        "sender" : {
-        "reference" : "Organization/"+str(sid)
-        }
-    }
-    return comreq
-def make_patient(pid, patient_info):
-    patient = {
-      "fullUrl": "http://example.org/fhir/Patient/" + str(pid),
-      "resource": {
-        "resourceType": "Patient",
-        "id": str(pid),
-        "text": {
-          "status": "generated",
-          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative with Details</b></p><p><b>id</b>: 1</p><p><b>identifier</b>: 12345678901</p><p><b>name</b>: "+patient_info["given"] + patient_info["family"] + " </p></div>"
-        },
-        "identifier": [
-          {
-            "system": "http://clinfhir.com/fhir/NamingSystem/identifier",
-            "value": ""
-          }
-        ],
-        "name": [
-          {
-            "family": "",
-            "given": []
-          }
-        ],
-        "address": []
-      }
-    }
-    if checkExists("identifier", patient_info):
-        patient["resource"]["identifier"][0]["value"] = patient_info["identifier"]
-    if checkExists("birthdate", patient_info):
-        patient["resource"]["birthDate"] = patient_info["birthdate"]
-    if checkExists("family", patient_info):
-        patient["resource"]["name"][0]["family"] = patient_info["family"]
-    if checkExists("given", patient_info):
-        patient["resource"]["name"][0]["given"].append(patient_info["given"])
-    if checkExists("address", patient_info):
-        patient["resource"]["address"].append(patient_info["family"])
-    if checkExists("identifier", patient_info):
-        patient["resource"]["identifier"][0]["value"] = patient_info["identifier"]
-    return patient
-def checkExists(key, obj):
-    return key in obj and not obj[key] == ""
-def make_org(id, name):
-    return {
-      "fullUrl": "http://example.org/fhir/Organization/" + str(id),
-      "resource": {
-        "resourceType": "Organization",
-        "id": str(id),
-        "text": {
-          "status": "generated",
-          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative with Details</b></p><p><b>id</b>: "+str(id)+"</p><p><b>identifier</b>: 789312</p><p><b>name</b>: "+name+"</p></div>"
-        },
-        "identifier": [
-          {
-            "system": "http://example.org/ETIN",
-            "value": "789312"
-          }
-        ],
-        "name": name
-      }
-    }
-def make_bundle_request(pid, sid, rid, patient_info):
-    comreq = {
-        "resourceType": "Bundle",
-        "id": "pcde-communicationrequest-example",
-        "meta": {
-          "lastUpdated": "2019-07-21T11:01:00+05:00"
-        },
-        "type": "collection",
-        "timestamp": "2019-07-21T11:01:00+05:00",
-        "entry": [
-          {"fullUrl": "http://example.org/fhir/CommunicationRequest/1",
-          "resource": make_request(pid, sid, rid)},
-          make_patient(pid, patient_info),
-          make_org(sid, "MARYLAND CAPITAL INSURANCE COMPANY"),
-          make_org(rid, "MARYLAND GLOBAL INSURANCE COMPANY"),
-          make_endpoint(5)
-        ]
-        }
-    return comreq
-# NOTE: UPDATE THIS TO HANDLE URL CORRECTLY
-def make_endpoint(id):
-    return {
-        "fullUrl": "http://example.org/fhir/Endpoint/" + str(id),
-        "resource": {
-            "resourceType" : "Endpoint",
-            "address" : str(return_endpoint)
-        }
-    }
 def test_address():
     return [
     {
